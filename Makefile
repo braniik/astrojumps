@@ -1,15 +1,8 @@
-# ─────────────────────────────────────────────────────────────────
-#  Makefile sem si robil pro linux kubo tak sry ked nepujde
-#  Stahni si WSL alebo jak to na windowsi funguje
-#  Alebo prejdi na linux
-# ─────────────────────────────────────────────────────────────────
-
 CC      := gcc
 TARGET  := whirlybird
 SRCDIR  := src
 INCDIR  := include
 BUILDDIR:= build
-
 SRCS    := $(wildcard $(SRCDIR)/*.c)
 OBJS    := $(patsubst $(SRCDIR)/%.c, $(BUILDDIR)/%.o, $(SRCS))
 
@@ -24,9 +17,16 @@ endif
 CFLAGS  := -Wall -Wextra -std=c99 -O2 -I$(INCDIR) $(RAYLIB_CFLAGS)
 LDFLAGS := $(RAYLIB_LIBS) -lm
 
-.PHONY: all clean run
+.PHONY: all debug clean run
 
 all: $(BUILDDIR) $(TARGET)
+
+debug: CFLAGS += -g -DDEBUG_BUILD
+debug: $(BUILDDIR) whirlybird_debug
+
+whirlybird_debug: $(OBJS)
+	$(CC) $^ -o $@ $(LDFLAGS)
+	@echo "✓  Debug build → ./whirlybird_debug"
 
 $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
@@ -42,4 +42,4 @@ run: all
 	./$(TARGET)
 
 clean:
-	rm -rf $(BUILDDIR) $(TARGET)
+	rm -rf $(BUILDDIR) $(TARGET) whirlybird_debug
