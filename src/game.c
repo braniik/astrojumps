@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <time.h>
 
+#ifdef DEBUG_BUILD
+#include "debug.h"
+#endif
+
 static char s_flashMsg[64] = {0};
 static float s_flashTimer = 0.0f;
 #define FLASH_DURATION 2.8f
@@ -53,6 +57,10 @@ void Game_Update(Game *g) {
     float moveDir = Controls_GetMoveDir(&g->controls);
     Player_Update(&g->player, moveDir);
 
+#ifdef DEBUG_BUILD
+    Debug_Update(g);
+#endif
+
     float playerScreenY = g->player.pos.y + g->cameraOffsetY;
     if (playerScreenY < SCREEN_HEIGHT / 2) {
       float diff = SCREEN_HEIGHT / 2 - playerScreenY;
@@ -73,6 +81,8 @@ void Game_Update(Game *g) {
     int milestoneReached = g->score / MILESTONE_INTERVAL;
     if (milestoneReached > g->lastMilestone) {
       g->lastMilestone = milestoneReached;
+      g->platforms.milestone = g->lastMilestone;
+
       Controls_Shuffle(&g->controls);
       char msg[64];
       snprintf(msg, sizeof(msg), "KEYS SHUFFLED!  [%c]=LEFT  [%c]=RIGHT",
@@ -157,6 +167,10 @@ void Game_Draw(Game *g) {
     }
 
     Controls_DrawHUD(&g->controls);
+
+#ifdef DEBUG_BUILD
+    Debug_Draw(g);
+#endif
     break;
 
   case STATE_GAME_OVER: {
