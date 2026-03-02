@@ -18,11 +18,11 @@ static void warpToMilestone(Game *g, int milestone) {
 void Debug_Update(Game *g) {
     if (g->state != STATE_PLAYING) return;
 
-    if (IsKeyPressed(KEY_ONE))   warpToMilestone(g, 1);
-    if (IsKeyPressed(KEY_TWO))   warpToMilestone(g, 2);
-    if (IsKeyPressed(KEY_THREE)) warpToMilestone(g, 3);
-    if (IsKeyPressed(KEY_FOUR))  warpToMilestone(g, 4);
-    if (IsKeyPressed(KEY_FIVE))  warpToMilestone(g, 5);
+    if (IsKeyPressed(KEY_F1))   warpToMilestone(g, 1);
+    if (IsKeyPressed(KEY_F2))   warpToMilestone(g, 2);
+    if (IsKeyPressed(KEY_F3)) warpToMilestone(g, 3);
+    if (IsKeyPressed(KEY_F4))  warpToMilestone(g, 4);
+    if (IsKeyPressed(KEY_F5))  warpToMilestone(g, 5);
 }
 
 void Debug_Draw(Game *g) {

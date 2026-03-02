@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include "raylib.h"
+#include "effects.h"
 
 #define PLAYER_WIDTH 36
 #define PLAYER_HEIGHT 36
@@ -12,16 +13,16 @@
 #define ROTATION_SPEED 8.0f
 
 typedef struct {
-  Vector2 pos;
-  Vector2 vel;
-  float rotation;
-  bool alive;
+    Vector2 pos;
+    Vector2 vel;
+    float rotation;
+    bool alive;
 } Player;
 
 void Player_Init(Player *p, float startX, float startY);
-void Player_Update(Player *p, float moveDir); // moveDir: -1, 0, +1
-void Player_Bounce(Player *p);
-void Player_Draw(Player *p, float cameraOffsetY);
+void Player_Update(Player *p, float moveDir, ActiveEffects *fx);
+void Player_Bounce(Player *p, ActiveEffects *fx);
+void Player_Draw(Player *p, float cameraOffsetY, ActiveEffects *fx);
 bool Player_IsBelowScreen(Player *p, float cameraOffsetY);
 
 #endif
