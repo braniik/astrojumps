@@ -8,8 +8,8 @@
 typedef struct {
     KeyboardKey leftKey;
     KeyboardKey rightKey;
-    char        leftChar;
-    char        rightChar;
+    char leftChar;
+    char rightChar;
 } Controls;
 
 void  Controls_Init(Controls *c);

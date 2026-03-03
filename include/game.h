@@ -18,17 +18,17 @@
 typedef enum { STATE_MENU, STATE_PLAYING, STATE_GAME_OVER } GameState;
 
 typedef struct {
-    GameState    state;
-    Player       player;
+    GameState state;
+    Player player;
     PlatformList platforms;
-    Controls     controls;
+    Controls controls;
     PowerupSystem powerups;
-    EventSystem  events;
+    EventSystem events;
     ActiveEffects fx;
-    float        cameraOffsetY;
-    int          score;
-    int          lastMilestone;
-    int          highScore;
+    float cameraOffsetY;
+    int score;
+    int lastMilestone;
+    int highScore;
 } Game;
 
 void Game_Init(Game *g);

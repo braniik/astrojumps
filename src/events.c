@@ -3,16 +3,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define LAVA_DURATION 30.0f
-#define LAVA_RISE_SPEED 1.8f
-#define WIND_DURATION 5.0f
+#define LAVA_DURATION 60.0f
+#define LAVA_RISE_SPEED 2.0f
+#define WIND_DURATION 60.0f
 #define WIND_FORCE 1.6f
-#define FLASH_DURATION 5.0f
-#define FLASH_SUBINTERVAL 1.0f
-#define BLACKOUT_DURATION 15.0f
-#define BLACKOUT_RAMP 4.0f
-#define BLACKOUT_HOLD 3.0f
-#define INVERSION_DURATION 20.0f
+#define FLASH_DURATION 60.0f
+#define FLASH_SUBINTERVAL 5.0f
+#define BLACKOUT_DURATION 60.0f
+#define BLACKOUT_RAMP 10.0f
+#define BLACKOUT_HOLD 20.0f
+#define INVERSION_DURATION 60.0f
 #define EVENT_INTERVAL 60.0f
 
 static void triggerRandom(EventSystem *es, float cameraOffsetY) {
