@@ -152,8 +152,10 @@ void EventSystem_EndCapture(EventSystem *es) {
     DrawTexturePro(
         es->invRT.texture,
         (Rectangle){0, 0, (float)SCREEN_WIDTH, -(float)SCREEN_HEIGHT},
-        (Rectangle){0, 0, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT},
-        (Vector2){0, 0}, 0.0f, WHITE
+        (Rectangle){SCREEN_WIDTH/2.0f, SCREEN_HEIGHT/2.0f, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT},
+        (Vector2){SCREEN_WIDTH/2.0f, SCREEN_HEIGHT/2.0f},
+        180.0f,
+        WHITE
     );
 }
 
