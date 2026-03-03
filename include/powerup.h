@@ -6,7 +6,6 @@
 #include <stdbool.h>
 
 #define MAX_WORLD_POWERUPS 8
-#define INVENTORY_SLOTS 3
 #define POWERUP_SPAWN_EVERY 1500.0f
 #define POWERUP_PICKUP_RADIUS 22.0f
 #define POWERUP_DRAW_RADIUS  11
@@ -30,7 +29,6 @@ typedef struct {
 typedef struct {
     WorldPowerup world[MAX_WORLD_POWERUPS];
     int          worldCount;
-    PowerupType  slots[INVENTORY_SLOTS];
     float        nextSpawnY;
 } PowerupSystem;
 
