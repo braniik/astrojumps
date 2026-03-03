@@ -2,16 +2,17 @@
 #include "game.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #define LAVA_DURATION 60.0f
 #define LAVA_RISE_SPEED 2.0f
 #define WIND_DURATION 60.0f
-#define WIND_FORCE 1.6f
+#define WIND_FORCE 1.25f
 #define FLASH_DURATION 60.0f
-#define FLASH_SUBINTERVAL 5.0f
+#define FLASH_SUBINTERVAL 0.5f
 #define BLACKOUT_DURATION 60.0f
 #define BLACKOUT_RAMP 10.0f
-#define BLACKOUT_HOLD 20.0f
+#define BLACKOUT_HOLD 40.0f
 #define INVERSION_DURATION 60.0f
 #define EVENT_INTERVAL 60.0f
 
@@ -114,11 +115,12 @@ void EventSystem_Update(EventSystem *es, float cameraOffsetY, float *outWindForc
             s->timer -= dt;
             float elapsed = BLACKOUT_DURATION - s->timer;
             float alpha;
-            if      (elapsed < BLACKOUT_RAMP)
+            if (elapsed < BLACKOUT_RAMP)
                 alpha = elapsed / BLACKOUT_RAMP;
-            else if (elapsed < BLACKOUT_RAMP + BLACKOUT_HOLD)
-                alpha = 1.0f;
-            else {
+            else if (elapsed < BLACKOUT_RAMP + BLACKOUT_HOLD) {
+                float t = elapsed - BLACKOUT_RAMP;
+                alpha = 0.50f + 0.50f * sinf(t * 0.314f); // SINUS KOSINUS ZDENA A HRONSKY CAUUUUTE
+            } else {
                 float t2 = elapsed - BLACKOUT_RAMP - BLACKOUT_HOLD;
                 alpha = 1.0f - t2 / BLACKOUT_RAMP;
                 if (alpha < 0.0f) alpha = 0.0f;
