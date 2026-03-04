@@ -23,11 +23,13 @@ void Debug_Update(Game *g) {
     if (IsKeyPressed(KEY_THREE)) warpToMilestone(g, 3);
     if (IsKeyPressed(KEY_FOUR))  warpToMilestone(g, 4);
     if (IsKeyPressed(KEY_FIVE))  warpToMilestone(g, 5);
+    if (IsKeyPressed(KEY_SIX))   warpToMilestone(g, 6);
+    if (IsKeyPressed(KEY_SEVEN)) warpToMilestone(g, 7);
 }
 
 void Debug_Draw(Game *g) {
     if (g->state != STATE_PLAYING) return;
-    int panelW = 210, panelH = 110;
+    int panelW = 250, panelH = 150;
     int panelX = SCREEN_WIDTH - panelW - 8;
     int panelY = 8;
 
@@ -41,14 +43,16 @@ void Debug_Draw(Game *g) {
     snprintf(buf, sizeof(buf), "Milestone: %d", g->lastMilestone);
     DrawText(buf, panelX + 8, panelY + 24, 13, WHITE);
 
-    static const char *labels[5] = {
-        "[1] fragile",
-        "[2] flicker",
-        "[3] move H",
-        "[4] move HV",
-        "[5] Teleport",
+    static const char *labels[7] = {
+        "[1] Moving H",
+        "[2] Flicker",
+        "[3] Moving Flicker + Moving HV",
+        "[4] Teleport + Moving V",
+        "[5] Moving V Flicker + Moving Teleport",
+        "[6] Disable Normal",
+        "[7] Disable Fragile",
     };
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 7; i++) {
         Color c = (i < g->lastMilestone)
                       ? (Color){100, 200, 100, 255}
                       : (i == g->lastMilestone)
