@@ -1,43 +1,23 @@
-CC      = gcc
-TARGET  = whirlybird
-SRC_DIR = src
-INC_DIR = include
-BLD_DIR = build
-
-SRCS = $(wildcard $(SRC_DIR)/*.c)
-OBJS = $(patsubst $(SRC_DIR)/%.c, $(BLD_DIR)/%.o, $(SRCS))
-
-CFLAGS = -Wall -Wextra -I$(INC_DIR)
-
-# Detect OS
-ifeq ($(OS), Windows_NT)
-    TARGET_BIN = $(TARGET).exe
-    LDFLAGS    = -lraylib -lopengl32 -lgdi32 -lwinmm
-    MKDIR      = if not exist $(BLD_DIR) mkdir $(BLD_DIR)
-    RM         = del /Q
-else
-    TARGET_BIN = $(TARGET)
-    LDFLAGS    = -lraylib -lm -ldl -lpthread
-    MKDIR      = mkdir -p $(BLD_DIR)
-    RM         = rm -f
-endif
+CC     = gcc
+SRC    = $(wildcard src/*.c)
+OBJS   = $(patsubst src/%.c, build/%.o, $(SRC))
+CFLAGS = -Wall -Wextra -Iinclude
+LIBS   = -lraylib -lm -ldl -lpthread
 
 .PHONY: all debug clean
 
-all: CFLAGS += -O2
-all: $(BLD_DIR) $(TARGET_BIN)
+all: build $(OBJS)
+	$(CC) $(OBJS) -o whirlybird $(LIBS)
 
 debug: CFLAGS += -DDEBUG_BUILD -g
-debug: $(BLD_DIR) $(TARGET_BIN)
+debug: build $(OBJS)
+	$(CC) $(OBJS) -o whirlybird $(LIBS)
 
-$(TARGET_BIN): $(OBJS)
-	$(CC) $(OBJS) -o $@ $(LDFLAGS)
-
-$(BLD_DIR)/%.o: $(SRC_DIR)/%.c
+build/%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BLD_DIR):
-	$(MKDIR)
+build:
+	mkdir -p build
 
 clean:
-	$(RM) $(BLD_DIR)/*.o $(TARGET_BIN)
+	rm -rf build whirlybird
