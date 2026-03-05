@@ -1,45 +1,43 @@
-CC      := gcc
-TARGET  := whirlybird
-SRCDIR  := src
-INCDIR  := include
-BUILDDIR:= build
-SRCS    := $(wildcard $(SRCDIR)/*.c)
-OBJS    := $(patsubst $(SRCDIR)/%.c, $(BUILDDIR)/%.o, $(SRCS))
+CC      = gcc
+TARGET  = whirlybird
+SRC_DIR = src
+INC_DIR = include
+BLD_DIR = build
 
-RAYLIB_CFLAGS := $(shell pkg-config --cflags raylib 2>/dev/null)
-RAYLIB_LIBS   := $(shell pkg-config --libs   raylib 2>/dev/null)
+SRCS = $(wildcard $(SRC_DIR)/*.c)
+OBJS = $(patsubst $(SRC_DIR)/%.c, $(BLD_DIR)/%.o, $(SRCS))
 
-ifeq ($(RAYLIB_LIBS),)
-    RAYLIB_CFLAGS := -I/usr/local/include
-    RAYLIB_LIBS   := -L/usr/local/lib -lraylib
+CFLAGS = -Wall -Wextra -I$(INC_DIR)
+
+# Detect OS
+ifeq ($(OS), Windows_NT)
+    TARGET_BIN = $(TARGET).exe
+    LDFLAGS    = -lraylib -lopengl32 -lgdi32 -lwinmm
+    MKDIR      = if not exist $(BLD_DIR) mkdir $(BLD_DIR)
+    RM         = del /Q
+else
+    TARGET_BIN = $(TARGET)
+    LDFLAGS    = -lraylib -lm -ldl -lpthread
+    MKDIR      = mkdir -p $(BLD_DIR)
+    RM         = rm -f
 endif
 
-CFLAGS  := -Wall -Wextra -std=c99 -O2 -I$(INCDIR) $(RAYLIB_CFLAGS)
-LDFLAGS := $(RAYLIB_LIBS) -lm
+.PHONY: all debug clean
 
-.PHONY: all debug clean run
+all: CFLAGS += -O2
+all: $(BLD_DIR) $(TARGET_BIN)
 
-all: $(BUILDDIR) $(TARGET)
+debug: CFLAGS += -DDEBUG_BUILD -g
+debug: $(BLD_DIR) $(TARGET_BIN)
 
-debug: CFLAGS += -g -DDEBUG_BUILD
-debug: $(BUILDDIR) whirlybird_debug
+$(TARGET_BIN): $(OBJS)
+	$(CC) $(OBJS) -o $@ $(LDFLAGS)
 
-whirlybird_debug: $(OBJS)
-	$(CC) $^ -o $@ $(LDFLAGS)
-	@echo "✓  Debug build → ./whirlybird_debug"
-
-$(BUILDDIR):
-	mkdir -p $(BUILDDIR)
-
-$(TARGET): $(OBJS)
-	$(CC) $^ -o $@ $(LDFLAGS)
-	@echo "✓  Build successful → ./$(TARGET)"
-
-$(BUILDDIR)/%.o: $(SRCDIR)/%.c
+$(BLD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-run: all
-	./$(TARGET)
+$(BLD_DIR):
+	$(MKDIR)
 
 clean:
-	rm -rf $(BUILDDIR) $(TARGET) whirlybird_debug
+	$(RM) $(BLD_DIR)/*.o $(TARGET_BIN)

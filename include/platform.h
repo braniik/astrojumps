@@ -11,11 +11,12 @@
 #define PLATFORM_GAP_MAX 140
 #define PLATFORM_MARGIN 30
 
-// pridal sem ruzne typy platforem s kteryma sa mozeme pohrat
 typedef enum {
     PLAT_NORMAL,
     PLAT_FRAGILE,
     PLAT_FLICKER,
+    PLAT_FLICKER_H,
+    PLAT_FLICKER_V,
     PLAT_MOVING_H,
     PLAT_MOVING_HV,
     PLAT_TELEPORT,
@@ -25,12 +26,12 @@ typedef struct {
   float x, y;
   bool active;
   PlatformType type;
-  bool used; // pro fragile platformu
-  float flickerTimer; // flicker pro flicker platformy (wow)
+  bool used;
+  float flickerTimer;
   bool flickerSolid;
-  float velX, velY; // pro moving platformy
+  float velX, velY;
   float baseY;
-  float teleportTimer; // pro teleporting platformy
+  float teleportTimer;
 } Platform;
 
 typedef struct {

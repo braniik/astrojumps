@@ -62,6 +62,7 @@ void Game_Update(Game *g) {
         float windForce   = 0.0f;
         float lavaScreenY = 0.0f;
         EventSystem_Update(&g->events, g->cameraOffsetY, &windForce, &lavaScreenY);
+
         float moveDir = Controls_GetMoveDir(&g->controls);
         moveDir += windForce / MOVE_SPEED;
         Player_Update(&g->player, moveDir, &g->fx);
@@ -151,6 +152,10 @@ void Game_Draw(Game *g) {
         const char *title = "WHIRLYBIRD";
         int tw = MeasureText(title, 52);
         DrawText(title, cx - tw/2, 180, 52, (Color){0, 220, 140, 255});
+
+        const char *sub = "Spin up. Don't fall.";
+        int sw2 = MeasureText(sub, 20);
+        DrawText(sub, cx - sw2/2, 248, 20, LIGHTGRAY);
 
         const char *hint = "ENTER or SPACE to play";
         int hw = MeasureText(hint, 18);

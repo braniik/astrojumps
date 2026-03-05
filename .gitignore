@@ -1,11 +1,9 @@
-build/
+*.o
+*.exe
 whirlybird
 whirlybird_debug
-
-.cache/
+.vscode/
 compile_commands.json
-*.swp
-*.swo
+.cache/
 .DS_Store
-
-.clangd
+Thumbs.db
