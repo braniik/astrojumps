@@ -1,5 +1,3 @@
-// generovani platforem, nekonecne scrollovani, detekcia landovana + platformiki experimenti
-
 #include "platform.h"
 #include "raylib.h"
 #include <stdlib.h>
@@ -107,12 +105,9 @@ static void spawnPlatform(PlatformList *pl) {
     int sw = GetScreenWidth();
     float gap  = randFloat(PLATFORM_GAP_MIN, PLATFORM_GAP_MAX);
     float newY = pl->highestY - gap;
-    float newX = PLATFORM_MARGIN +
-                 (float)(rand() % (sw - PLATFORM_WIDTH - PLATFORM_MARGIN * 2));
+    float newX = PLATFORM_MARGIN + (float)(rand() % (sw - PLATFORM_WIDTH - PLATFORM_MARGIN * 2));
 
-    PlatformType type = (pl->count == 0) ? PLAT_NORMAL : pickType(pl->milestone);
-
-    initPlatform(&pl->items[pl->count], newX, newY, type);
+    initPlatform(&pl->items[pl->count], newX, newY, pickType(pl->milestone));
     pl->count++;
     pl->highestY = newY;
 }
@@ -308,18 +303,8 @@ void PlatformList_Draw(PlatformList *pl, float cameraOffsetY) {
                 break;
 
             case PLAT_FLICKER_H:
-                if (p->flickerSolid) {
-                    DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_MOVING_BODY);
-                    DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_FLICKER_ON);
-                    DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_FLICKER_SHINE);
-                } else {
-                    DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_FLICKER_OFF);
-                }
-                break;
-
             case PLAT_FLICKER_V:
                 if (p->flickerSolid) {
-                    DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_MOVING_BODY);
                     DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_FLICKER_ON);
                     DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_FLICKER_SHINE);
                 } else {

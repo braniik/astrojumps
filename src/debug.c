@@ -36,7 +36,7 @@ static void forceEvent(Game *g, EventType t) {
             break;
         case EVT_WIND:
             s->timer = DBG_WIND_DURATION;
-            s->data  = (s->data > 0.0f) ? -1.0f : 1.0f;
+            s->data  = (rand() % 2) ? 1.0f : -1.0f;
             break;
         case EVT_FLASH:
             s->timer = DBG_FLASH_DURATION;

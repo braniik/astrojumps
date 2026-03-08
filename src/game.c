@@ -1,5 +1,3 @@
-// menu, jestli sa hraje, game over, zakladne veci co sa tyka hry jak nazev rice
-
 #include "game.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,11 +9,11 @@
 
 static char  s_flashMsg[64] = {0};
 static float s_flashTimer   = 0.0f;
-#define FLASH_DURATION 2.8f
+#define SHUFFLE_MSG_DURATION 2.8f
 
 static void triggerFlash(const char *msg) {
     snprintf(s_flashMsg, sizeof(s_flashMsg), "%s", msg);
-    s_flashTimer = FLASH_DURATION;
+    s_flashTimer = SHUFFLE_MSG_DURATION;
 }
 
 void Game_Init(Game *g) {
@@ -153,10 +151,6 @@ void Game_Draw(Game *g) {
         int tw = MeasureText(title, 52);
         DrawText(title, cx - tw/2, 180, 52, (Color){0, 220, 140, 255});
 
-        const char *sub = "Spin up. Don't fall.";
-        int sw2 = MeasureText(sub, 20);
-        DrawText(sub, cx - sw2/2, 248, 20, LIGHTGRAY);
-
         const char *hint = "ENTER or SPACE to play";
         int hw = MeasureText(hint, 18);
         DrawText(hint, cx - hw/2, SCREEN_HEIGHT - 120, 18, GRAY);
@@ -197,7 +191,7 @@ void Game_Draw(Game *g) {
         DrawText(nBuf, 10, 34, 14, GRAY);
 
         if (s_flashTimer > 0) {
-            float alpha = s_flashTimer / FLASH_DURATION;
+            float alpha = s_flashTimer / SHUFFLE_MSG_DURATION;
             if (alpha > 1.0f) alpha = 1.0f;
             Color fc = Fade((Color){255, 220, 50, 255}, alpha);
             int fw = MeasureText(s_flashMsg, 25);
