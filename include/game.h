@@ -29,6 +29,8 @@ typedef struct {
     int score;
     int lastMilestone;
     int highScore;
+    bool randomEventsEnabled;
+    bool keyShuffleEnabled;
 } Game;
 
 void Game_Init(Game *g);

@@ -19,11 +19,13 @@ static void triggerFlash(const char *msg) {
 void Game_Init(Game *g) {
     srand((unsigned int)time(NULL));
 
-    g->state         = STATE_MENU;
-    g->cameraOffsetY = 0.0f;
-    g->score         = 0;
-    g->lastMilestone = 0;
-    g->highScore     = 0;
+    g->state               = STATE_MENU;
+    g->cameraOffsetY       = 0.0f;
+    g->score               = 0;
+    g->lastMilestone       = 0;
+    g->highScore           = 0;
+    g->randomEventsEnabled = true;
+    g->keyShuffleEnabled   = true;
 
     Controls_Init(&g->controls);
     Player_Init(&g->player, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT - 120.0f);
@@ -52,14 +54,18 @@ void Game_Update(Game *g) {
     switch (g->state) {
 
     case STATE_MENU:
+        if (IsKeyPressed(KEY_E)) g->randomEventsEnabled = !g->randomEventsEnabled;
+        if (IsKeyPressed(KEY_K)) g->keyShuffleEnabled   = !g->keyShuffleEnabled;
         if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE))
             startGame(g);
         break;
 
     case STATE_PLAYING: {
         float windForce   = 0.0f;
-        float lavaScreenY = 0.0f;
-        EventSystem_Update(&g->events, g->cameraOffsetY, &windForce, &lavaScreenY);
+        float lavaScreenY = (float)SCREEN_HEIGHT * 10.0f;
+
+        if (g->randomEventsEnabled)
+            EventSystem_Update(&g->events, g->cameraOffsetY, &windForce, &lavaScreenY);
 
         float moveDir = Controls_GetMoveDir(&g->controls);
         moveDir += windForce / MOVE_SPEED;
@@ -94,13 +100,18 @@ void Game_Update(Game *g) {
 
         int milestoneReached = g->score / MILESTONE_INTERVAL;
         if (milestoneReached > g->lastMilestone) {
-            g->lastMilestone           = milestoneReached;
-            g->platforms.milestone     = g->lastMilestone;
-            Controls_Shuffle(&g->controls);
-            char msg[64];
-            snprintf(msg, sizeof(msg), "[%c]=LEFT  [%c]=RIGHT",
-                     g->controls.leftChar, g->controls.rightChar);
-            triggerFlash(msg);
+            g->lastMilestone       = milestoneReached;
+            g->platforms.milestone = g->lastMilestone;
+
+            if (g->keyShuffleEnabled) {
+                Controls_Shuffle(&g->controls);
+                char msg[64];
+                snprintf(msg, sizeof(msg), "[%c]=LEFT  [%c]=RIGHT",
+                         g->controls.leftChar, g->controls.rightChar);
+                triggerFlash(msg);
+            } else {
+                triggerFlash("Milestone!");
+            }
         }
 
         if (s_flashTimer > 0) s_flashTimer -= GetFrameTime();
@@ -133,8 +144,31 @@ void Game_Update(Game *g) {
     }
 }
 
+static void drawToggleRow(int cx, int y, const char *label, const char *key,
+                          bool enabled) {
+    Color keyCol    = (Color){180, 180, 180, 255};
+    Color labelCol  = WHITE;
+    Color stateCol  = enabled ? (Color){0, 220, 140, 255} : (Color){160, 60, 60, 255};
+    const char *stateStr = enabled ? "ON" : "OFF";
+
+    char keyBuf[8];
+    snprintf(keyBuf, sizeof(keyBuf), "[%s]", key);
+
+    int rowW    = 280;
+    int rowX    = cx - rowW / 2;
+    int keyW    = MeasureText(keyBuf,  16);
+    int labelW  = MeasureText(label,   16);
+    int stateW  = MeasureText(stateStr, 16);
+
+    DrawText(keyBuf,   rowX, y, 16, keyCol);
+    DrawText(label,    rowX + keyW + 10, y, 16, labelCol);
+    DrawText(stateStr, rowX + rowW - stateW, y, 16, stateCol);
+    (void)labelW;
+}
+
+
 void Game_Draw(Game *g) {
-    bool inverted = EventSystem_IsInverted(&g->events);
+    bool inverted = g->randomEventsEnabled && EventSystem_IsInverted(&g->events);
 
     if (inverted)
         EventSystem_BeginCapture(&g->events);
@@ -147,27 +181,44 @@ void Game_Draw(Game *g) {
 
     case STATE_MENU: {
         int cx = SCREEN_WIDTH / 2;
+
         const char *title = "WHIRLYBIRD";
         int tw = MeasureText(title, 52);
-        DrawText(title, cx - tw/2, 180, 52, (Color){0, 220, 140, 255});
+        DrawText(title, cx - tw / 2, 160, 52, (Color){0, 220, 140, 255});
 
-        const char *hint = "ENTER or SPACE to play";
-        int hw = MeasureText(hint, 18);
-        DrawText(hint, cx - hw/2, SCREEN_HEIGHT - 120, 18, GRAY);
+        DrawLine(cx - 120, 230, cx + 120, 230, Fade(WHITE, 0.15f));
 
-        const char *twist = "Keys shuffle at each milestone!";
-        int tww = MeasureText(twist, 16);
-        DrawText(twist, cx - tww/2, SCREEN_HEIGHT - 90, 16, (Color){255, 200, 60, 255});
+        DrawText("OPTIONS", cx - MeasureText("OPTIONS", 13) / 2,
+                 242, 13, Fade(WHITE, 0.4f));
+
+        drawToggleRow(cx, 268, "Random Events", "E", g->randomEventsEnabled);
+        drawToggleRow(cx, 294, "Key Shuffle",   "K", g->keyShuffleEnabled);
+
+        if (g->keyShuffleEnabled) {
+            const char *hint = "Keys reassign at every milestone";
+            DrawText(hint, cx - MeasureText(hint, 12) / 2,
+                     322, 12, (Color){255, 200, 60, 120});
+        }
+
+        DrawLine(cx - 120, 348, cx + 120, 348, Fade(WHITE, 0.15f));
+
+        if (g->highScore > 0) {
+            char hbuf[32];
+            snprintf(hbuf, sizeof(hbuf), "Best: %d", g->highScore);
+            DrawText(hbuf, cx - MeasureText(hbuf, 16) / 2,
+                     362, 16, (Color){255, 200, 60, 255});
+        }
+
+        const char *play = "ENTER  or  SPACE  to play";
+        DrawText(play, cx - MeasureText(play, 18) / 2,
+                 SCREEN_HEIGHT - 100, 18, WHITE);
         break;
     }
 
     case STATE_PLAYING: {
-        float lavaScreenY = 0.0f;
-        EventSlot *lavaSlot = &g->events.slots[EVT_LAVA];
-        if (lavaSlot->active)
-            lavaScreenY = lavaSlot->data + g->cameraOffsetY;
-        else
-            lavaScreenY = (float)SCREEN_HEIGHT * 10.0f;
+        float lavaScreenY = (float)SCREEN_HEIGHT * 10.0f;
+        if (g->randomEventsEnabled && g->events.slots[EVT_LAVA].active)
+            lavaScreenY = g->events.slots[EVT_LAVA].data + g->cameraOffsetY;
 
         PlatformList_Draw(&g->platforms, g->cameraOffsetY);
         PowerupSystem_Draw(&g->powerups, g->cameraOffsetY);
@@ -188,27 +239,29 @@ void Game_Draw(Game *g) {
         int nextM = (g->lastMilestone + 1) * MILESTONE_INTERVAL;
         char nBuf[48];
         snprintf(nBuf, sizeof(nBuf), "Next shuffle: %d", nextM);
-        DrawText(nBuf, 10, 34, 14, GRAY);
+        if (g->keyShuffleEnabled)
+            DrawText(nBuf, 10, 34, 14, GRAY);
 
         if (s_flashTimer > 0) {
             float alpha = s_flashTimer / SHUFFLE_MSG_DURATION;
             if (alpha > 1.0f) alpha = 1.0f;
             Color fc = Fade((Color){255, 220, 50, 255}, alpha);
             int fw = MeasureText(s_flashMsg, 25);
-            DrawText(s_flashMsg, SCREEN_WIDTH/2 - fw/2,
-                     SCREEN_HEIGHT/2 - 30, 25, fc);
+            DrawText(s_flashMsg, SCREEN_WIDTH / 2 - fw / 2,
+                     SCREEN_HEIGHT / 2 - 30, 25, fc);
         }
 
         if (g->fx.bootsTimer > 0.0f && !g->fx.bootsUsed) {
             const char *bh = "[SPACE] double jump";
             int bw = MeasureText(bh, 13);
-            DrawText(bh, SCREEN_WIDTH/2 - bw/2, SCREEN_HEIGHT - 56,
+            DrawText(bh, SCREEN_WIDTH / 2 - bw / 2, SCREEN_HEIGHT - 56,
                      13, Fade((Color){50, 220, 220, 255}, 0.8f));
         }
 
         Controls_DrawHUD(&g->controls);
         PowerupSystem_DrawHUD(&g->powerups, &g->fx);
-        EventSystem_DrawOverlay(&g->events);
+        if (g->randomEventsEnabled)
+            EventSystem_DrawOverlay(&g->events);
 
 #ifdef DEBUG_BUILD
         Debug_Draw(g);
@@ -220,24 +273,20 @@ void Game_Draw(Game *g) {
         int cx = SCREEN_WIDTH / 2;
         const char *over = "GAME OVER";
         int ow = MeasureText(over, 48);
-        DrawText(over, cx - ow/2, 200, 48, RED);
+        DrawText(over, cx - ow / 2, 200, 48, RED);
 
         char scoreLine[48], hiBuf[48];
         snprintf(scoreLine, sizeof(scoreLine), "Score:  %d", g->score);
         snprintf(hiBuf,     sizeof(hiBuf),     "Best:   %d", g->highScore);
 
-        int slw = MeasureText(scoreLine, 24);
-        int hbw = MeasureText(hiBuf, 24);
-        DrawText(scoreLine, cx - slw/2, 270, 24, WHITE);
-        DrawText(hiBuf,     cx - hbw/2, 300, 24, (Color){255, 200, 60, 255});
+        DrawText(scoreLine, cx - MeasureText(scoreLine, 24) / 2, 270, 24, WHITE);
+        DrawText(hiBuf,     cx - MeasureText(hiBuf,     24) / 2, 300, 24, (Color){255, 200, 60, 255});
 
         const char *r = "ENTER / SPACE  to restart";
-        int rw = MeasureText(r, 16);
-        DrawText(r, cx - rw/2, SCREEN_HEIGHT - 100, 16, GRAY);
+        DrawText(r, cx - MeasureText(r, 16) / 2, SCREEN_HEIGHT - 100, 16, GRAY);
 
         const char *m = "ESC  for menu";
-        int mw = MeasureText(m, 16);
-        DrawText(m, cx - mw/2, SCREEN_HEIGHT - 76, 16, DARKGRAY);
+        DrawText(m, cx - MeasureText(m, 16) / 2, SCREEN_HEIGHT - 76, 16, DARKGRAY);
         break;
     }
     }
