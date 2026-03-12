@@ -3,6 +3,7 @@
 #include "debug.h"
 #include "game.h"
 #include "raylib.h"
+#include <stdlib.h>
 #include <stdio.h>
 
 static void warpToMilestone(Game *g, int milestone) {

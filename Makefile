@@ -2,7 +2,7 @@ CC     = gcc
 SRC    = $(wildcard src/*.c)
 OBJS   = $(patsubst src/%.c, build/%.o, $(SRC))
 CFLAGS = -Wall -Wextra -Iinclude
-LIBS   = -lraylib -lm -ldl -lpthread
+LIBS   = -lraylib -lm -lpthread
 
 .PHONY: all debug clean
 

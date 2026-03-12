@@ -9,16 +9,26 @@
 #define MOVE_V_RANGE         55.0f
 #define TELEPORT_INTERVAL    2.4f
 
-static const Color COL_NORMAL_BODY  = {  60, 120, 220, 255 };
+static const Color COL_NORMAL_BODY  = { 55, 38, 255, 255 };
 static const Color COL_NORMAL_SHINE = { 120, 180, 255, 255 };
-static const Color COL_FRAGILE_BODY = {  80, 140, 240, 255 };
-static const Color COL_FLICKER_ON   = { 240, 140,  30, 255 };
-static const Color COL_FLICKER_SHINE= { 255, 190,  80, 255 };
-static const Color COL_FLICKER_OFF  = { 100,  55,  10, 160 };
-static const Color COL_MOVING_BODY  = { 220, 200,  30, 255 };
-static const Color COL_MOVING_SHINE = { 255, 240, 100, 255 };
-static const Color COL_TELEPORT_BOD = { 170,  60, 220, 255 };
-static const Color COL_TELEPORT_SHN = { 220, 130, 255, 255 };
+static const Color COL_FRAGILE_BODY = { 20, 162, 255, 255 };
+static const Color COL_FLICKER_ON   = { 46, 255, 56, 255 };
+static const Color COL_FLICKER_SHINE= { 125, 255, 132, 255 };
+static const Color COL_FLICKER_OFF  = { 25, 102, 29, 160 };
+static const Color COL_FLICKER_ON_H = { 233, 255, 33, 255 };
+static const Color COL_FLICKER_SHINE_H = { 243, 255, 125, 255 };
+static const Color COL_FLICKER_OFF_H = { 101, 110, 24, 160 };
+static const Color COL_FLICKER_ON_V = { 255, 101, 0, 255 };
+static const Color COL_FLICKER_SHINE_V = { 255, 183, 135, 255 };
+static const Color COL_FLICKER_OFF_V = { 115, 58, 21, 160 };
+static const Color COL_MOVING_BODY  = { 94, 20, 20, 200 };
+static const Color COL_MOVING_SHINE = { 112, 57, 57, 200 };
+static const Color COL_MOVING_BODY_H  = { 20, 255, 224, 255 };
+static const Color COL_MOVING_SHINE_H = { 128, 255, 240, 255 };
+static const Color COL_MOVING_BODY_HV  = { 176, 0, 0, 255 };
+static const Color COL_MOVING_SHINE_HV = { 255, 51, 51, 255 };
+static const Color COL_TELEPORT_BOD = { 149, 0, 255, 255 };
+static const Color COL_TELEPORT_SHN = { 199, 120, 255, 255 };
 
 static float randFloat(float lo, float hi) {
     return lo + (float)(rand() % 1000) / 1000.0f * (hi - lo);
@@ -52,8 +62,7 @@ static PlatformType pickType(int milestone) {
         if (milestone >= 3) pool[n++] = PLAT_MOVING_HV;
         if (milestone >= 3) pool[n++] = PLAT_FLICKER_H;
         if (milestone >= 5) pool[n++] = PLAT_FLICKER_V;
-    }
-    return pool[rand() % n];
+    } return pool[rand() % n];
 }
 
 static void initPlatform(Platform *p, float x, float y, PlatformType type) {
@@ -303,22 +312,34 @@ void PlatformList_Draw(PlatformList *pl, float cameraOffsetY) {
                 break;
 
             case PLAT_FLICKER_H:
+                if (p->flickerSolid) {
+                    DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_FLICKER_ON_H);
+                    DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_FLICKER_SHINE_H);
+                } else {
+                    DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_FLICKER_OFF_H);
+                }
+                break;
+
+
             case PLAT_FLICKER_V:
                 if (p->flickerSolid) {
-                    DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_FLICKER_ON);
-                    DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_FLICKER_SHINE);
+                    DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_FLICKER_ON_V);
+                    DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_FLICKER_SHINE_V);
                 } else {
-                    DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_FLICKER_OFF);
+                    DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_FLICKER_OFF_V);
                 }
                 break;
 
             case PLAT_MOVING_H:
-                DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_MOVING_BODY);
-                DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_MOVING_SHINE);
+                DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_MOVING_BODY_H);
+                DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_MOVING_SHINE_H);
                 break;
 
             case PLAT_MOVING_HV:
+                DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_MOVING_BODY_HV);
+                DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_MOVING_SHINE_HV);
                 drawDotted(sx, sy, COL_MOVING_BODY);
+                drawDotted(sx, sy, COL_MOVING_SHINE);
                 break;
 
             case PLAT_TELEPORT:
