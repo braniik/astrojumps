@@ -14,6 +14,12 @@ void Player_Init(Player *p, float startX, float startY) {
     p->vel      = (Vector2){ 0.0f, 0.0f };
     p->rotation = 0.0f;
     p->alive    = true;
+    p->texture  = LoadTexture("assets/sprites/character.png");
+    p->textureJetpack = LoadTexture("assets/sprites/characterwjetpack.png"); //mozno tu bude nejaky problem este ze to je spatne linknute
+    p->textureBoots = LoadTexture("assets/sprites/characterwboty.png"); //aj tuu
+    SetTextureFilter(p->texture, TEXTURE_FILTER_POINT);
+    SetTextureFilter(p->textureJetpack, TEXTURE_FILTER_POINT);
+    SetTextureFilter(p->textureBoots, TEXTURE_FILTER_POINT);
 }
 
 void Player_Update(Player *p, float moveDir, ActiveEffects *fx) {
@@ -54,27 +60,37 @@ void Player_Draw(Player *p, float cameraOffsetY, ActiveEffects *fx) {
     float sy     = p->pos.y + cameraOffsetY;
     Vector2 ctr  = { p->pos.x, sy };
 
-    Color col = (Color){0, 200, 100, 255};
+    Texture2D tex = p->texture;
+
+    if (fx && fx->jetpackTimer > 0.0f) { //no tu je to este furt dosrane
+    tex = p->textureJetpack;
+    }
+    else if (fx && fx->bootsTimer > 0.0f) { //toto to iste
+    tex = p->textureBoots;
+    }
 
     float drawW = PLAYER_WIDTH, drawH = PLAYER_HEIGHT;
     if (fx && fx->elixirTimer > 0.0f) {
-        drawW = PLAYER_WIDTH  * 1.45f;
-        drawH = PLAYER_HEIGHT * 1.45f;
-        col   = (Color){80, 220, 80, 255};
+        drawW = PLAYER_WIDTH  * 2.5;
+        drawH = PLAYER_HEIGHT * 1;
     }
 
-    DrawRectanglePro(
-        (Rectangle){ ctr.x, ctr.y, drawW, drawH },
-        (Vector2){ drawW / 2.0f, drawH / 2.0f },
-        p->rotation, col
-    );
-
-    if (fx && fx->jetpackTimer > 0.0f) {
-        DrawCircle((int)ctr.x, (int)(ctr.y + drawH/2.0f + 6),
-                   7, Fade((Color){255, 140, 30, 255}, 0.75f));
-        DrawCircle((int)ctr.x, (int)(ctr.y + drawH/2.0f + 6),
-                   4, Fade((Color){255, 230, 80, 255}, 0.9f));
-    }
+Rectangle source = { 0, 0, (float)tex.width, (float)tex.height };
+Rectangle dest = {
+    ctr.x,
+    ctr.y,
+    drawW,
+    drawH
+};
+Vector2 origin = { drawW / 2.0f, drawH / 2.0f };
+DrawTexturePro(
+    tex,
+    source,
+    dest,
+    origin,
+    p->rotation,
+    WHITE
+);
 
     if (fx && fx->haloReviveTimer > 0.0f) {
         float alpha = fx->haloReviveTimer / 1.5f;
@@ -87,3 +103,10 @@ void Player_Draw(Player *p, float cameraOffsetY, ActiveEffects *fx) {
 bool Player_IsBelowScreen(Player *p, float cameraOffsetY) {
     return (p->pos.y + cameraOffsetY) > GetScreenHeight() + PLAYER_HEIGHT;
 }
+
+void Player_Unload(Player *p) {
+    UnloadTexture(p->texture);
+    UnloadTexture(p->textureJetpack);
+    UnloadTexture(p->textureBoots);
+}
+

@@ -301,4 +301,5 @@ void Game_Draw(Game *g) {
 
 void Game_Cleanup(Game *g) {
     EventSystem_Cleanup(&g->events);
+    Player_Unload(&g->player);
 }

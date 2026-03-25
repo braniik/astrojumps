@@ -378,5 +378,6 @@ bool PlatformList_CheckCollision(PlatformList *pl, Rectangle playerRect,
             return true;
         }
     }
+    
     return false;
 }
