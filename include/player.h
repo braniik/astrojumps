@@ -22,11 +22,14 @@ typedef struct {
     Texture2D textureBoots;
 } Player;
 
+extern Music bgm;
+
 void Player_Init(Player *p, float startX, float startY);
 void Player_Update(Player *p, float moveDir, ActiveEffects *fx);
 void Player_Bounce(Player *p, ActiveEffects *fx);
 void Player_Draw(Player *p, float cameraOffsetY, ActiveEffects *fx);
 void Player_Unload(Player *p);
 bool Player_IsBelowScreen(Player *p, float cameraOffsetY);
+
 
 #endif

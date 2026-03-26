@@ -5,6 +5,7 @@
 
 int main(void) {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, GAME_TITLE);
+  InitAudioDevice();
   SetExitKey(KEY_NULL);
   SetTargetFPS(TARGET_FPS);
 

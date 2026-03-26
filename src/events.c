@@ -16,6 +16,8 @@
 #define INVERSION_DURATION 60.0f
 #define EVENT_INTERVAL 60.0f
 
+Sound sfxWind;
+
 static void triggerRandom(EventSystem *es, float cameraOffsetY) {
     int tries = 0;
     EventType t;
@@ -56,6 +58,7 @@ void EventSystem_Init(EventSystem *es) {
     es->nextEventTimer = EVENT_INTERVAL;
     es->invRT      = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
     es->invRTReady = true;
+    sfxWind = LoadSound("assets/sfx/wind.mp3");
 }
 
 void EventSystem_Reset(EventSystem *es) {
@@ -97,6 +100,10 @@ void EventSystem_Update(EventSystem *es, float cameraOffsetY, float *outWindForc
             s->timer -= dt;
             *outWindForce = s->data * WIND_FORCE;
             if (s->timer <= 0.0f) s->active = false;
+            if (!IsSoundPlaying(sfxWind)) {
+            PlaySound(sfxWind);}
+            } else {
+            StopSound(sfxWind);
         }
     }
 
@@ -199,4 +206,9 @@ void EventSystem_DrawOverlay(EventSystem *es) {
         DrawText(EVT_NAMES[i], SCREEN_WIDTH/2 - tw/2, ty, 13, EVT_COLORS[i]);
         ty += 16;
     }
+}
+
+void EventSystem_Unload(EventSystem *es) {
+    UnloadTexture(es->invRT.texture);
+    UnloadSound(sfxWind);
 }

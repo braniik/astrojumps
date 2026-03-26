@@ -9,6 +9,10 @@
 #define POWERUP_SPAWN_EVERY 1500.0f
 #define POWERUP_PICKUP_RADIUS 22.0f
 #define POWERUP_DRAW_RADIUS  11
+#define PU_JETPACK_TIME  5.0f
+#define PU_BOOTS_TIME   15.0f
+#define PU_ELIXIR_TIME  10.0f
+#define PU_FEATHER_TIME 10.0f
 
 typedef enum {
     PU_NONE    = -1,

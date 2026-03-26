@@ -9,6 +9,12 @@
 #include "player.h"
 #include <math.h>
 
+Sound sfxBoots;
+Sound sfxJetpack;
+Sound sfxElixir;
+Sound sfxRevive;
+
+
 void Player_Init(Player *p, float startX, float startY) {
     p->pos      = (Vector2){ startX, startY };
     p->vel      = (Vector2){ 0.0f, 0.0f };
@@ -17,6 +23,14 @@ void Player_Init(Player *p, float startX, float startY) {
     p->texture  = LoadTexture("assets/sprites/character.png");
     p->textureJetpack = LoadTexture("assets/sprites/characterwjetpack.png"); //mozno tu bude nejaky problem este ze to je spatne linknute
     p->textureBoots = LoadTexture("assets/sprites/characterwboty.png"); //aj tuu
+    sfxBoots = LoadSound("assets/sfx/doublejump.mp3");
+    sfxJetpack = LoadSound("assets/sfx/jetpackbeep.mp3");
+    sfxElixir = LoadSound("assets/sfx/elixir.mp3");
+    sfxRevive = LoadSound("assets/sfx/revive2.mp3");
+    SetSoundVolume(sfxBoots, 1);
+    SetSoundVolume(sfxJetpack, 1);
+    SetSoundVolume(sfxElixir, 1);
+    SetSoundVolume(sfxRevive, 1);
     SetTextureFilter(p->texture, TEXTURE_FILTER_POINT);
     SetTextureFilter(p->textureJetpack, TEXTURE_FILTER_POINT);
     SetTextureFilter(p->textureBoots, TEXTURE_FILTER_POINT);
@@ -24,10 +38,12 @@ void Player_Init(Player *p, float startX, float startY) {
 
 void Player_Update(Player *p, float moveDir, ActiveEffects *fx) {
     p->vel.x = moveDir * MOVE_SPEED;
-
     if (fx && fx->jetpackTimer > 0.0f) {
         p->vel.y = -8.5f;
+        if (!IsSoundPlaying(sfxJetpack)) {
+        PlaySound(sfxJetpack);}
     } else {
+        StopSound(sfxJetpack);
         float gravity  = (fx && fx->featherTimer > 0.0f) ? GRAVITY * 0.32f : GRAVITY;
         float maxFall  = (fx && fx->featherTimer > 0.0f) ? MAX_FALL_SPEED * 0.38f : MAX_FALL_SPEED;
         p->vel.y += gravity;
@@ -38,8 +54,17 @@ void Player_Update(Player *p, float moveDir, ActiveEffects *fx) {
         if (IsKeyPressed(KEY_SPACE)) {
             p->vel.y     = BOUNCE_FORCE;
             fx->bootsUsed = true;
+            PlaySound(sfxBoots);
         }
     }
+
+    if (fx && fx->elixirTimer > 0.0f) {
+        if (!IsSoundPlaying(sfxElixir)) {
+        PlaySound(sfxElixir);}
+    } else {
+        StopSound(sfxElixir);
+    }
+
 
     p->pos.x += p->vel.x;
     p->pos.y += p->vel.y;
@@ -97,6 +122,11 @@ DrawTexturePro(
         if (alpha > 1.0f) alpha = 1.0f;
         DrawCircle((int)ctr.x, (int)ctr.y,
                    (int)(drawW * 1.8f), Fade((Color){255, 230, 50, 255}, alpha * 0.55f));
+        if (!IsSoundPlaying(sfxRevive)) {
+        PlaySound(sfxRevive);}
+        } else {
+        StopSound(sfxRevive);
+
     }
 }
 
@@ -104,9 +134,14 @@ bool Player_IsBelowScreen(Player *p, float cameraOffsetY) {
     return (p->pos.y + cameraOffsetY) > GetScreenHeight() + PLAYER_HEIGHT;
 }
 
+
 void Player_Unload(Player *p) {
     UnloadTexture(p->texture);
     UnloadTexture(p->textureJetpack);
     UnloadTexture(p->textureBoots);
+    UnloadSound(sfxBoots);
+    UnloadSound(sfxJetpack);
+    UnloadSound(sfxElixir);
+    UnloadSound(sfxRevive);
 }
 

@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 Texture2D powerupTextures[PU_TYPE_COUNT];
+Sound sfxPickup;
 
 #define JETPACK_TIME  5.0f
 #define BOOTS_TIME   15.0f
@@ -39,6 +40,9 @@ void PowerupSystem_Init(PowerupSystem *ps, float startWorldY) {
     powerupTextures[PU_BOOTS]   = LoadTexture("assets/sprites/boots.png");
     powerupTextures[PU_ELIXIR]  = LoadTexture("assets/sprites/elixir.png");
     powerupTextures[PU_FEATHER] = LoadTexture("assets/sprites/feather.png");
+    sfxPickup = LoadSound("assets/sfx/pickup.mp3");
+    SetSoundVolume(sfxPickup, 1);
+
 
 for (int i = 0; i < PU_TYPE_COUNT; i++) {
     SetTextureFilter(powerupTextures[i], TEXTURE_FILTER_POINT);
@@ -81,6 +85,7 @@ void PowerupSystem_Update(PowerupSystem *ps, float cameraOffsetY,
                 default: break;
             }
             wp->active = false;
+            PlaySound(sfxPickup);
         }
     }
 
@@ -132,5 +137,6 @@ void PowerupSystem_Unload() {
     for (int i = 0; i < PU_TYPE_COUNT; i++) {
         UnloadTexture(powerupTextures[i]);
         powerupTextures[i] = (Texture2D){0};
+        UnloadSound(sfxPickup);
     }
 }

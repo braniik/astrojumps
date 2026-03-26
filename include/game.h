@@ -31,6 +31,7 @@ typedef struct {
     int highScore;
     bool randomEventsEnabled;
     bool keyShuffleEnabled;
+    bool bgmEnabled;
 } Game;
 
 void Game_Init(Game *g);

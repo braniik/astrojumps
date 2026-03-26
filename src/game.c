@@ -7,6 +7,9 @@
 #include "debug.h"
 #endif
 
+Music bgm;
+Sound sfxMilestone;
+
 static char  s_flashMsg[64] = {0};
 static float s_flashTimer   = 0.0f;
 #define SHUFFLE_MSG_DURATION 2.8f
@@ -17,6 +20,11 @@ static void triggerFlash(const char *msg) {
 }
 
 void Game_Init(Game *g) {
+    bgm = LoadMusicStream("assets/sfx/soundtrack.mp3");
+    PlayMusicStream(bgm);
+    SetMusicVolume(bgm, 0.5f);
+    g->bgmEnabled = true;
+    
     srand((unsigned int)time(NULL));
 
     g->state               = STATE_MENU;
@@ -33,6 +41,8 @@ void Game_Init(Game *g) {
     PowerupSystem_Init(&g->powerups, (float)(SCREEN_HEIGHT - 120));
     EventSystem_Init(&g->events);
     g->fx = (ActiveEffects){0};
+
+    sfxMilestone = LoadSound("assets/sfx/milestone.mp3");
 }
 
 static void startGame(Game *g) {
@@ -51,11 +61,18 @@ static void startGame(Game *g) {
 }
 
 void Game_Update(Game *g) {
+
+    UpdateMusicStream(bgm);
+
     switch (g->state) {
 
     case STATE_MENU:
         if (IsKeyPressed(KEY_E)) g->randomEventsEnabled = !g->randomEventsEnabled;
         if (IsKeyPressed(KEY_K)) g->keyShuffleEnabled   = !g->keyShuffleEnabled;
+        if (IsKeyPressed(KEY_M)) {
+            g->bgmEnabled = !g->bgmEnabled;
+            SetMusicVolume(bgm, g->bgmEnabled ? 0.5f : 0.0f);
+        }
         if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE))
             startGame(g);
         break;
@@ -111,6 +128,7 @@ void Game_Update(Game *g) {
                 triggerFlash(msg);
             } else {
                 triggerFlash("Milestone!");
+                PlaySound(sfxMilestone);
             }
         }
 
@@ -193,11 +211,12 @@ void Game_Draw(Game *g) {
 
         drawToggleRow(cx, 268, "Random Events", "E", g->randomEventsEnabled);
         drawToggleRow(cx, 294, "Key Shuffle",   "K", g->keyShuffleEnabled);
+        drawToggleRow(cx, 320, "Music",         "M", g->bgmEnabled);
 
         if (g->keyShuffleEnabled) {
             const char *hint = "Keys reassign at every milestone";
             DrawText(hint, cx - MeasureText(hint, 12) / 2,
-                     322, 12, (Color){255, 200, 60, 120});
+                     350, 12, (Color){255, 200, 60, 120});
         }
 
         DrawLine(cx - 120, 348, cx + 120, 348, Fade(WHITE, 0.15f));
@@ -302,4 +321,7 @@ void Game_Draw(Game *g) {
 void Game_Cleanup(Game *g) {
     EventSystem_Cleanup(&g->events);
     Player_Unload(&g->player);
+    UnloadSound(sfxMilestone);
+    StopMusicStream(bgm);
+    UnloadMusicStream(bgm);
 }

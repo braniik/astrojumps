@@ -11,6 +11,8 @@ typedef struct {
     bool  haloReady;
     bool  bootsUsed;
     float haloReviveTimer;
+    bool  jetpackSoundPlaying;
 } ActiveEffects;
+
 
 #endif

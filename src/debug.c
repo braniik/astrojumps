@@ -1,5 +1,6 @@
 #ifdef DEBUG_BUILD
 
+
 #include "debug.h"
 #include "game.h"
 #include "raylib.h"
@@ -68,12 +69,17 @@ void Debug_Update(Game *g) {
     if (IsKeyPressed(KEY_THREE)) forceEvent(g, EVT_FLASH);
     if (IsKeyPressed(KEY_FOUR))  forceEvent(g, EVT_BLACKOUT);
     if (IsKeyPressed(KEY_FIVE))  forceEvent(g, EVT_INVERSION);
+    if (IsKeyPressed(KEY_J)) g->fx.jetpackTimer  = PU_JETPACK_TIME;
+    if (IsKeyPressed(KEY_B)) g->fx.bootsTimer   = PU_BOOTS_TIME;
+    if (IsKeyPressed(KEY_E)) g->fx.elixirTimer  = PU_ELIXIR_TIME;
+    if (IsKeyPressed(KEY_F)) g->fx.featherTimer = PU_FEATHER_TIME;
+    if (IsKeyPressed(KEY_H)) g->fx.haloReady    = true;
 }
 
 void Debug_Draw(Game *g) {
     if (g->state != STATE_PLAYING) return;
 
-    int panelW = 220, panelH = 262;
+    int panelW = 220, panelH = 300;
     int panelX = SCREEN_WIDTH  - panelW - 8;
     int panelY = 8;
 
@@ -122,6 +128,7 @@ void Debug_Draw(Game *g) {
         {200, 100, 255, 255},
     };
 
+
     int ey = divY + 5;
     for (int i = 0; i < EVT_COUNT; i++) {
         bool  active = g->events.slots[i].active;
@@ -137,6 +144,46 @@ void Debug_Draw(Game *g) {
             DrawRectangle(barX, barY, (int)(barW * frac), 9, Fade(eColors[i], 0.8f));
         }
     }
+
+    static const Color dbgPUColors[PU_TYPE_COUNT] = {
+    {255, 140,  30, 255},  // Jetpack
+    {255, 230,  50, 255},  // Revivos
+    { 50, 220, 220, 255},  // Boty
+    { 80, 220,  80, 255},  // Elixir
+    {220, 220, 220, 255},  // Feather
+};
+    DrawText("[J] Jetpack, [H] Halo, [B] Boots, [E] Elixir, [F] Feather", panelX - 50, panelY + 303, 4, (Color){160, 160, 255, 255});
+    static const char *puLabels[5] = {
+    "[J] Jetpack",
+    "[H] Halo",
+    "[B] Boots",
+    "[E] Elixir",
+    "[F] Feather"
+};
+    int py = panelY + 230; //okej toto tu je zbytecne ale tak necham to tu
+    if (g->fx.jetpackTimer > 0) {
+    DrawText(puLabels[0], panelX + 8, py, 12, dbgPUColors[PU_JETPACK]);
+    py += 14;
+}
+if (g->fx.haloReady) {
+    DrawText(puLabels[1], panelX + 8, py, 12, dbgPUColors[PU_HALO]);
+    py += 14;
+}
+if (g->fx.bootsTimer > 0) {
+    DrawText(puLabels[2], panelX + 8, py, 12, dbgPUColors[PU_BOOTS]);
+    py += 14;
+}
+if (g->fx.elixirTimer > 0) {
+    DrawText(puLabels[3], panelX + 8, py, 12, dbgPUColors[PU_ELIXIR]);
+    py += 14;
+}
+if (g->fx.featherTimer > 0) {
+    DrawText(puLabels[4], panelX + 8, py, 12, dbgPUColors[PU_FEATHER]);
+    py += 14;
+}
+
 }
 
 #endif
+
+
