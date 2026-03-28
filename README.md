@@ -3,7 +3,8 @@
 A keyboard-driven space platformer built with C and raylib. Jump higher and higher through the cosmos — but watch out, the controls shuffle every milestone.
 
 ## High Score Screenshots (Can you beat us? 🤔)
-
+### Braniik's high score (All modifiers enabled)
+<img width="411" height="640" alt="image" src="https://github.com/user-attachments/assets/69bc5567-3c29-49d6-92a5-3a7578ffb434" />
 
 ## Features
 
