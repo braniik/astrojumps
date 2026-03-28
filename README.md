@@ -18,6 +18,19 @@ A keyboard-driven space platformer built with C and raylib. Jump higher and high
 - **Random events:** Rising lava, wind gusts, flash blindness, blackout, and screen inversion.
 - **Space aesthetic:** Pure black background, neon-lit platforms, starfield feel.
 
+## Installation
+
+#### Windows
+Download the installer from the [latest release](https://github.com/braniik/astrojumps/releases/latest).
+
+#### Arch Linux (AUR)
+```bash
+yay -S astrojumps-git
+```
+
+#### Other Linux — build from source
+See the [Build from Source](#build-from-source) section below.
+
 ## Dependencies
 
 - `raylib` — must be installed system-wide
