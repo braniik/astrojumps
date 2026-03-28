@@ -12,7 +12,7 @@
 #define SCREEN_WIDTH 480
 #define SCREEN_HEIGHT 720
 #define TARGET_FPS 60
-#define GAME_TITLE "Whirlybird"
+#define GAME_TITLE "Astrojumps"
 #define MILESTONE_INTERVAL 800
 
 typedef enum { STATE_MENU, STATE_PLAYING, STATE_GAME_OVER } GameState;

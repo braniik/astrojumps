@@ -8,11 +8,9 @@ typedef struct {
     float featherTimer;
     float elixirTimer;
     float bootsTimer;
-    bool  haloReady;
-    bool  bootsUsed;
+    bool haloReady;
+    bool bootsUsed;
     float haloReviveTimer;
-    bool  jetpackSoundPlaying;
 } ActiveEffects;
-
 
 #endif

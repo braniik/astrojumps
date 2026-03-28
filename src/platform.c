@@ -2,35 +2,33 @@
 #include "raylib.h"
 #include <stdlib.h>
 
-#define FLICKER_SOLID_TIME   1.2f
-#define FLICKER_DARK_TIME    0.7f
-#define MOVE_SPEED_MIN       1.2f
-#define MOVE_SPEED_MAX       2.8f
-#define MOVE_V_RANGE         55.0f
-#define TELEPORT_INTERVAL    2.4f
+#define FLICKER_SOLID_TIME 1.2f
+#define FLICKER_DARK_TIME 0.7f
+#define MOVE_SPEED_MIN 1.2f
+#define MOVE_SPEED_MAX 2.8f
+#define MOVE_V_RANGE 55.0f
+#define TELEPORT_INTERVAL 2.4f
 
-static const Color COL_NORMAL_BODY  = { 55, 38, 255, 255 };
+static const Color COL_NORMAL_BODY = { 55, 38, 255, 255 };
 static const Color COL_NORMAL_SHINE = { 120, 180, 255, 255 };
 static const Color COL_FRAGILE_BODY = { 20, 162, 255, 255 };
-static const Color COL_FLICKER_ON   = { 46, 255, 56, 255 };
-static const Color COL_FLICKER_SHINE= { 125, 255, 132, 255 };
-static const Color COL_FLICKER_OFF  = { 25, 102, 29, 160 };
+static const Color COL_FLICKER_ON = { 46, 255, 56, 255 };
+static const Color COL_FLICKER_SHINE = { 125, 255, 132, 255 };
+static const Color COL_FLICKER_OFF = { 25, 102, 29, 160 };
 static const Color COL_FLICKER_ON_H = { 233, 255, 33, 255 };
-static const Color COL_FLICKER_SHINE_H = { 243, 255, 125, 255 };
+static const Color COL_FLICKER_SHN_H = { 243, 255, 125, 255 };
 static const Color COL_FLICKER_OFF_H = { 101, 110, 24, 160 };
 static const Color COL_FLICKER_ON_V = { 255, 101, 0, 255 };
-static const Color COL_FLICKER_SHINE_V = { 255, 183, 135, 255 };
+static const Color COL_FLICKER_SHN_V = { 255, 183, 135, 255 };
 static const Color COL_FLICKER_OFF_V = { 115, 58, 21, 160 };
-static const Color COL_MOVING_BODY  = { 94, 20, 20, 200 };
-static const Color COL_MOVING_SHINE = { 112, 57, 57, 200 };
-static const Color COL_MOVING_BODY_H  = { 20, 255, 224, 255 };
+static const Color COL_MOVING_BODY_H = { 20, 255, 224, 255 };
 static const Color COL_MOVING_SHINE_H = { 128, 255, 240, 255 };
-static const Color COL_MOVING_BODY_HV  = { 176, 0, 0, 255 };
-static const Color COL_MOVING_SHINE_HV = { 255, 51, 51, 255 };
-static const Color COL_TELEPORT_BOD = { 149, 0, 255, 255 };
-static const Color COL_TELEPORT_SHN = { 199, 120, 255, 255 };
+static const Color COL_MOVING_BODY_HV = { 176, 0, 0, 255 };
+static const Color COL_MOVING_SHN_HV = { 255, 51, 51, 255 };
+static const Color COL_TELEPORT_BODY = { 149, 0, 255, 255 };
+static const Color COL_TELEPORT_SHINE = { 199, 120, 255, 255 };
 
-static float randFloat(float lo, float hi) {
+static float rand_float(float lo, float hi) {
     return lo + (float)(rand() % 1000) / 1000.0f * (hi - lo);
 }
 
@@ -62,45 +60,46 @@ static PlatformType pickType(int milestone) {
         if (milestone >= 3) pool[n++] = PLAT_MOVING_HV;
         if (milestone >= 3) pool[n++] = PLAT_FLICKER_H;
         if (milestone >= 5) pool[n++] = PLAT_FLICKER_V;
-    } return pool[rand() % n];
+    }
+    return pool[rand() % n];
 }
 
 static void initPlatform(Platform *p, float x, float y, PlatformType type) {
     *p = (Platform){0};
-    p->x             = x;
-    p->y             = y;
-    p->active        = true;
-    p->type          = type;
-    p->flickerSolid  = true;
-    p->baseY         = y;
+    p->x = x;
+    p->y = y;
+    p->active = true;
+    p->type = type;
+    p->flickerSolid = true;
+    p->baseY = y;
     p->teleportTimer = TELEPORT_INTERVAL;
 
     switch (type) {
         case PLAT_FLICKER:
-            p->flickerTimer = randFloat(0.0f, FLICKER_SOLID_TIME);
+            p->flickerTimer = rand_float(0.0f, FLICKER_SOLID_TIME);
             break;
 
         case PLAT_FLICKER_H:
-            p->flickerTimer = randFloat(0.0f, FLICKER_SOLID_TIME);
-            p->velX = randFloat(MOVE_SPEED_MIN, MOVE_SPEED_MAX);
+            p->flickerTimer = rand_float(0.0f, FLICKER_SOLID_TIME);
+            p->velX = rand_float(MOVE_SPEED_MIN, MOVE_SPEED_MAX);
             if (rand() % 2) p->velX = -p->velX;
             break;
 
         case PLAT_FLICKER_V:
-            p->flickerTimer = randFloat(0.0f, FLICKER_SOLID_TIME);
-            p->velY = randFloat(0.4f, 1.0f);
+            p->flickerTimer = rand_float(0.0f, FLICKER_SOLID_TIME);
+            p->velY = rand_float(0.4f, 1.0f);
             if (rand() % 2) p->velY = -p->velY;
             break;
 
         case PLAT_MOVING_H:
-            p->velX = randFloat(MOVE_SPEED_MIN, MOVE_SPEED_MAX);
+            p->velX = rand_float(MOVE_SPEED_MIN, MOVE_SPEED_MAX);
             if (rand() % 2) p->velX = -p->velX;
             break;
 
         case PLAT_MOVING_HV:
-            p->velX = randFloat(MOVE_SPEED_MIN, MOVE_SPEED_MAX);
+            p->velX = rand_float(MOVE_SPEED_MIN, MOVE_SPEED_MAX);
             if (rand() % 2) p->velX = -p->velX;
-            p->velY = randFloat(0.4f, 1.0f);
+            p->velY = rand_float(0.4f, 1.0f);
             if (rand() % 2) p->velY = -p->velY;
             break;
 
@@ -110,9 +109,8 @@ static void initPlatform(Platform *p, float x, float y, PlatformType type) {
 
 static void spawnPlatform(PlatformList *pl) {
     if (pl->count >= MAX_PLATFORMS) return;
-
     int sw = GetScreenWidth();
-    float gap  = randFloat(PLATFORM_GAP_MIN, PLATFORM_GAP_MAX);
+    float gap = rand_float(PLATFORM_GAP_MIN, PLATFORM_GAP_MAX);
     float newY = pl->highestY - gap;
     float newX = PLATFORM_MARGIN + (float)(rand() % (sw - PLATFORM_WIDTH - PLATFORM_MARGIN * 2));
 
@@ -122,12 +120,11 @@ static void spawnPlatform(PlatformList *pl) {
 }
 
 void PlatformList_Init(PlatformList *pl) {
-    pl->count     = 0;
-    pl->highestY  = 0.0f;
+    pl->count = 0;
+    pl->highestY = 0.0f;
     pl->milestone = 0;
 
     int sh = GetScreenHeight();
-
     initPlatform(&pl->items[pl->count++],
                  (float)(GetScreenWidth() / 2 - PLATFORM_WIDTH / 2),
                  (float)(sh - 80),
@@ -140,8 +137,8 @@ void PlatformList_Init(PlatformList *pl) {
 
 void PlatformList_Update(PlatformList *pl, float cameraOffsetY) {
     float dt = GetFrameTime();
-    int   sw = GetScreenWidth();
-    int   sh = GetScreenHeight();
+    int sw = GetScreenWidth();
+    int sh = GetScreenHeight();
 
     for (int i = 0; i < pl->count; i++) {
         Platform *p = &pl->items[i];
@@ -157,8 +154,7 @@ void PlatformList_Update(PlatformList *pl, float cameraOffsetY) {
                 p->flickerTimer -= dt;
                 if (p->flickerTimer <= 0.0f) {
                     p->flickerSolid = !p->flickerSolid;
-                    p->flickerTimer = p->flickerSolid ? FLICKER_SOLID_TIME
-                                                      : FLICKER_DARK_TIME;
+                    p->flickerTimer = p->flickerSolid ? FLICKER_SOLID_TIME : FLICKER_DARK_TIME;
                 }
                 break;
 
@@ -166,17 +162,12 @@ void PlatformList_Update(PlatformList *pl, float cameraOffsetY) {
                 p->flickerTimer -= dt;
                 if (p->flickerTimer <= 0.0f) {
                     p->flickerSolid = !p->flickerSolid;
-                    p->flickerTimer = p->flickerSolid ? FLICKER_SOLID_TIME
-                                                      : FLICKER_DARK_TIME;
+                    p->flickerTimer = p->flickerSolid ? FLICKER_SOLID_TIME : FLICKER_DARK_TIME;
                 }
                 p->x += p->velX;
-                if (p->x < PLATFORM_MARGIN) {
-                    p->x    = PLATFORM_MARGIN;
-                    p->velX = -p->velX;
-                }
+                if (p->x < PLATFORM_MARGIN) { p->x = PLATFORM_MARGIN; p->velX = -p->velX; }
                 if (p->x > sw - PLATFORM_WIDTH - PLATFORM_MARGIN) {
-                    p->x    = (float)(sw - PLATFORM_WIDTH - PLATFORM_MARGIN);
-                    p->velX = -p->velX;
+                    p->x = (float)(sw - PLATFORM_WIDTH - PLATFORM_MARGIN); p->velX = -p->velX;
                 }
                 break;
 
@@ -184,78 +175,53 @@ void PlatformList_Update(PlatformList *pl, float cameraOffsetY) {
                 p->flickerTimer -= dt;
                 if (p->flickerTimer <= 0.0f) {
                     p->flickerSolid = !p->flickerSolid;
-                    p->flickerTimer = p->flickerSolid ? FLICKER_SOLID_TIME
-                                                      : FLICKER_DARK_TIME;
+                    p->flickerTimer = p->flickerSolid ? FLICKER_SOLID_TIME : FLICKER_DARK_TIME;
                 }
                 p->y += p->velY;
-                if (p->y > p->baseY + MOVE_V_RANGE) {
-                    p->y    = p->baseY + MOVE_V_RANGE;
-                    p->velY = -p->velY;
-                }
-                if (p->y < p->baseY - MOVE_V_RANGE) {
-                    p->y    = p->baseY - MOVE_V_RANGE;
-                    p->velY = -p->velY;
-                }
+                if (p->y > p->baseY + MOVE_V_RANGE) { p->y = p->baseY + MOVE_V_RANGE; p->velY = -p->velY; }
+                if (p->y < p->baseY - MOVE_V_RANGE) { p->y = p->baseY - MOVE_V_RANGE; p->velY = -p->velY; }
                 break;
 
             case PLAT_MOVING_H:
                 p->x += p->velX;
-                if (p->x < PLATFORM_MARGIN) {
-                    p->x    = PLATFORM_MARGIN;
-                    p->velX = -p->velX;
-                }
+                if (p->x < PLATFORM_MARGIN) { p->x = PLATFORM_MARGIN; p->velX = -p->velX; }
                 if (p->x > sw - PLATFORM_WIDTH - PLATFORM_MARGIN) {
-                    p->x    = (float)(sw - PLATFORM_WIDTH - PLATFORM_MARGIN);
-                    p->velX = -p->velX;
+                    p->x = (float)(sw - PLATFORM_WIDTH - PLATFORM_MARGIN); p->velX = -p->velX;
                 }
                 break;
 
             case PLAT_MOVING_HV:
                 p->x += p->velX;
                 p->y += p->velY;
-                if (p->x < PLATFORM_MARGIN) {
-                    p->x    = PLATFORM_MARGIN;
-                    p->velX = -p->velX;
-                }
+                if (p->x < PLATFORM_MARGIN) { p->x = PLATFORM_MARGIN; p->velX = -p->velX; }
                 if (p->x > sw - PLATFORM_WIDTH - PLATFORM_MARGIN) {
-                    p->x    = (float)(sw - PLATFORM_WIDTH - PLATFORM_MARGIN);
-                    p->velX = -p->velX;
+                    p->x = (float)(sw - PLATFORM_WIDTH - PLATFORM_MARGIN); p->velX = -p->velX;
                 }
-                if (p->y > p->baseY + MOVE_V_RANGE) {
-                    p->y    = p->baseY + MOVE_V_RANGE;
-                    p->velY = -p->velY;
-                }
-                if (p->y < p->baseY - MOVE_V_RANGE) {
-                    p->y    = p->baseY - MOVE_V_RANGE;
-                    p->velY = -p->velY;
-                }
+                if (p->y > p->baseY + MOVE_V_RANGE) { p->y = p->baseY + MOVE_V_RANGE; p->velY = -p->velY; }
+                if (p->y < p->baseY - MOVE_V_RANGE) { p->y = p->baseY - MOVE_V_RANGE; p->velY = -p->velY; }
                 break;
 
             case PLAT_TELEPORT:
                 p->teleportTimer -= dt;
                 if (p->teleportTimer <= 0.0f) {
                     p->teleportTimer = TELEPORT_INTERVAL;
-                    float worldTop    = -cameraOffsetY - (float)sh * 0.1f;
+                    float worldTop = -cameraOffsetY - (float)sh * 0.1f;
                     float worldBottom = -cameraOffsetY + (float)sh * 0.9f;
-                    p->x = PLATFORM_MARGIN +
-                           (float)(rand() % (sw - PLATFORM_WIDTH - PLATFORM_MARGIN * 2));
-                    p->y = worldTop + randFloat(0.0f, worldBottom - worldTop);
+                    p->x = PLATFORM_MARGIN + (float)(rand() % (sw - PLATFORM_WIDTH - PLATFORM_MARGIN * 2));
+                    p->y = worldTop + rand_float(0.0f, worldBottom - worldTop);
                 }
                 break;
 
             default: break;
         }
 
-        float screenY = p->y + cameraOffsetY;
-        if (screenY > sh + PLATFORM_HEIGHT)
+        if (p->y + cameraOffsetY > sh + PLATFORM_HEIGHT)
             p->active = false;
     }
 
     int w = 0;
-    for (int i = 0; i < pl->count; i++) {
-        if (pl->items[i].active)
-            pl->items[w++] = pl->items[i];
-    }
+    for (int i = 0; i < pl->count; i++)
+        if (pl->items[i].active) pl->items[w++] = pl->items[i];
     pl->count = w;
 
     float cameraTop = -cameraOffsetY;
@@ -264,22 +230,18 @@ void PlatformList_Update(PlatformList *pl, float cameraOffsetY) {
 }
 
 static void drawDotted(int x, int y, Color body) {
-    int segW  = 12;
-    int gapW  = 8;
+    int segW = 12;
+    int gapW = 8;
     int total = PLATFORM_WIDTH;
-    int cx    = x;
-    while (cx < x + total) {
+    for (int cx = x; cx < x + total; cx += segW + gapW) {
         int w = segW;
         if (cx + w > x + total) w = x + total - cx;
         DrawRectangle(cx, y, w, PLATFORM_HEIGHT, body);
-        cx += segW + gapW;
     }
-    cx = x;
-    while (cx < x + total) {
+    for (int cx = x; cx < x + total; cx += segW + gapW) {
         int w = segW;
         if (cx + w > x + total) w = x + total - cx;
         DrawRectangle(cx, y, w, 3, Fade(WHITE, 0.35f));
-        cx += segW + gapW;
     }
 }
 
@@ -314,17 +276,16 @@ void PlatformList_Draw(PlatformList *pl, float cameraOffsetY) {
             case PLAT_FLICKER_H:
                 if (p->flickerSolid) {
                     DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_FLICKER_ON_H);
-                    DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_FLICKER_SHINE_H);
+                    DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_FLICKER_SHN_H);
                 } else {
                     DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_FLICKER_OFF_H);
                 }
                 break;
 
-
             case PLAT_FLICKER_V:
                 if (p->flickerSolid) {
                     DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_FLICKER_ON_V);
-                    DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_FLICKER_SHINE_V);
+                    DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_FLICKER_SHN_V);
                 } else {
                     DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_FLICKER_OFF_V);
                 }
@@ -337,14 +298,12 @@ void PlatformList_Draw(PlatformList *pl, float cameraOffsetY) {
 
             case PLAT_MOVING_HV:
                 DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_MOVING_BODY_HV);
-                DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_MOVING_SHINE_HV);
-                drawDotted(sx, sy, COL_MOVING_BODY);
-                drawDotted(sx, sy, COL_MOVING_SHINE);
+                DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_MOVING_SHN_HV);
                 break;
 
             case PLAT_TELEPORT:
-                DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_TELEPORT_BOD);
-                DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_TELEPORT_SHN);
+                DrawRectangle(sx, sy, PLATFORM_WIDTH, PLATFORM_HEIGHT, COL_TELEPORT_BODY);
+                DrawRectangle(sx, sy, PLATFORM_WIDTH, 3, COL_TELEPORT_SHINE);
                 break;
         }
     }
@@ -354,30 +313,27 @@ bool PlatformList_CheckCollision(PlatformList *pl, Rectangle playerRect,
                                  float playerVelY, float cameraOffsetY) {
     if (playerVelY <= 0.0f) return false;
 
-    float feet     = playerRect.y + playerRect.height;
+    float feet = playerRect.y + playerRect.height;
     float feetPrev = feet - playerVelY;
 
     for (int i = 0; i < pl->count; i++) {
         Platform *p = &pl->items[i];
         if (!p->active) continue;
-
-        if ((p->type == PLAT_FLICKER   ||
+        if ((p->type == PLAT_FLICKER ||
              p->type == PLAT_FLICKER_H ||
              p->type == PLAT_FLICKER_V) && !p->flickerSolid) continue;
 
         float px = p->x;
         float py = p->y + cameraOffsetY;
 
-        bool overlapX   = (playerRect.x + playerRect.width > px) &&
+        bool overlapX = (playerRect.x + playerRect.width > px) &&
                           (playerRect.x < px + PLATFORM_WIDTH);
         bool crossedTop = (feetPrev <= py) && (feet >= py);
 
         if (overlapX && crossedTop) {
-            if (p->type == PLAT_FRAGILE)
-                p->used = true;
+            if (p->type == PLAT_FRAGILE) p->used = true;
             return true;
         }
     }
-    
     return false;
 }

@@ -1,7 +1,7 @@
 *.o
 *.exe
-whirlybird
-whirlybird_debug
+astrojumps
+astrojumps_debug
 .vscode/
 compile_commands.json
 .cache/

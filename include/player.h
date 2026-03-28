@@ -10,7 +10,6 @@
 #define BOUNCE_FORCE -13.0f
 #define MOVE_SPEED 4.5f
 #define MAX_FALL_SPEED 12.0f
-#define ROTATION_SPEED 8.0f
 
 typedef struct {
     Vector2 pos;
@@ -18,18 +17,19 @@ typedef struct {
     float rotation;
     bool alive;
     Texture2D texture;
-    Texture2D textureJetpack; //neviem ci by aj tu nemohlo byt daco zle ale neviem jak a co
+    Texture2D textureJetpack;
     Texture2D textureBoots;
 } Player;
 
-extern Music bgm;
-
+void Player_Load(Player *p);
+void Player_Reset(Player *p, float startX, float startY);
 void Player_Init(Player *p, float startX, float startY);
+
 void Player_Update(Player *p, float moveDir, ActiveEffects *fx);
 void Player_Bounce(Player *p, ActiveEffects *fx);
 void Player_Draw(Player *p, float cameraOffsetY, ActiveEffects *fx);
-void Player_Unload(Player *p);
 bool Player_IsBelowScreen(Player *p, float cameraOffsetY);
-
+void Player_StopSounds(void);
+void Player_Unload(Player *p);
 
 #endif

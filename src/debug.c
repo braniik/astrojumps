@@ -1,6 +1,5 @@
 #ifdef DEBUG_BUILD
 
-
 #include "debug.h"
 #include "game.h"
 #include "raylib.h"
@@ -8,25 +7,25 @@
 #include <stdio.h>
 
 static void warpToMilestone(Game *g, int milestone) {
-    int targetScore  = milestone * MILESTONE_INTERVAL + 10;
-    g->score         = targetScore;
+    int targetScore = milestone * MILESTONE_INTERVAL + 10;
+    g->score = targetScore;
     g->lastMilestone = milestone;
     g->cameraOffsetY = 0.0f;
     PlatformList_Init(&g->platforms);
     g->platforms.milestone = milestone;
-    Player_Init(&g->player, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT - 120.0f);
+    Player_Reset(&g->player, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT - 120.0f);
 }
 
-#define DBG_LAVA_DURATION      60.0f
-#define DBG_WIND_DURATION      60.0f
-#define DBG_FLASH_DURATION     60.0f
-#define DBG_FLASH_SUBINTERVAL   5.0f
-#define DBG_BLACKOUT_DURATION  60.0f
+#define DBG_LAVA_DURATION 60.0f
+#define DBG_WIND_DURATION 60.0f
+#define DBG_FLASH_DURATION 60.0f
+#define DBG_FLASH_SUBINTERVAL 5.0f
+#define DBG_BLACKOUT_DURATION 60.0f
 #define DBG_INVERSION_DURATION 60.0f
 
 static void forceEvent(Game *g, EventType t) {
     EventSystem *es = &g->events;
-    EventSlot   *s  = &es->slots[t];
+    EventSlot *s = &es->slots[t];
 
     es->nextEventTimer = 60.0f;
     s->active = true;
@@ -34,19 +33,19 @@ static void forceEvent(Game *g, EventType t) {
     switch (t) {
         case EVT_LAVA:
             s->timer = DBG_LAVA_DURATION;
-            s->data  = -g->cameraOffsetY + (float)SCREEN_HEIGHT + 50.0f;
+            s->data = -g->cameraOffsetY + (float)SCREEN_HEIGHT + 50.0f;
             break;
         case EVT_WIND:
             s->timer = DBG_WIND_DURATION;
-            s->data  = (rand() % 2) ? 1.0f : -1.0f;
+            s->data = (rand() % 2) ? 1.0f : -1.0f;
             break;
         case EVT_FLASH:
             s->timer = DBG_FLASH_DURATION;
-            s->data  = DBG_FLASH_SUBINTERVAL;
+            s->data = DBG_FLASH_SUBINTERVAL;
             break;
         case EVT_BLACKOUT:
             s->timer = DBG_BLACKOUT_DURATION;
-            s->data  = 0.0f;
+            s->data = 0.0f;
             break;
         case EVT_INVERSION:
             s->timer = DBG_INVERSION_DURATION;
@@ -57,6 +56,7 @@ static void forceEvent(Game *g, EventType t) {
 
 void Debug_Update(Game *g) {
     if (g->state != STATE_PLAYING) return;
+
     if (IsKeyPressed(KEY_F1)) warpToMilestone(g, 1);
     if (IsKeyPressed(KEY_F2)) warpToMilestone(g, 2);
     if (IsKeyPressed(KEY_F3)) warpToMilestone(g, 3);
@@ -64,23 +64,40 @@ void Debug_Update(Game *g) {
     if (IsKeyPressed(KEY_F5)) warpToMilestone(g, 5);
     if (IsKeyPressed(KEY_F6)) warpToMilestone(g, 6);
     if (IsKeyPressed(KEY_F7)) warpToMilestone(g, 7);
-    if (IsKeyPressed(KEY_ONE))   forceEvent(g, EVT_LAVA);
-    if (IsKeyPressed(KEY_TWO))   forceEvent(g, EVT_WIND);
+
+    if (IsKeyPressed(KEY_ONE)) forceEvent(g, EVT_LAVA);
+    if (IsKeyPressed(KEY_TWO)) forceEvent(g, EVT_WIND);
     if (IsKeyPressed(KEY_THREE)) forceEvent(g, EVT_FLASH);
-    if (IsKeyPressed(KEY_FOUR))  forceEvent(g, EVT_BLACKOUT);
-    if (IsKeyPressed(KEY_FIVE))  forceEvent(g, EVT_INVERSION);
-    if (IsKeyPressed(KEY_J)) g->fx.jetpackTimer  = PU_JETPACK_TIME;
-    if (IsKeyPressed(KEY_B)) g->fx.bootsTimer   = PU_BOOTS_TIME;
-    if (IsKeyPressed(KEY_E)) g->fx.elixirTimer  = PU_ELIXIR_TIME;
+    if (IsKeyPressed(KEY_FOUR)) forceEvent(g, EVT_BLACKOUT);
+    if (IsKeyPressed(KEY_FIVE)) forceEvent(g, EVT_INVERSION);
+
+    if (IsKeyPressed(KEY_J)) g->fx.jetpackTimer = PU_JETPACK_TIME;
+    if (IsKeyPressed(KEY_B)) g->fx.bootsTimer = PU_BOOTS_TIME;
+    if (IsKeyPressed(KEY_E)) g->fx.elixirTimer = PU_ELIXIR_TIME;
     if (IsKeyPressed(KEY_F)) g->fx.featherTimer = PU_FEATHER_TIME;
-    if (IsKeyPressed(KEY_H)) g->fx.haloReady    = true;
+    if (IsKeyPressed(KEY_H)) g->fx.haloReady = true;
 }
 
 void Debug_Draw(Game *g) {
     if (g->state != STATE_PLAYING) return;
 
+    static const Color EVT_COLORS[EVT_COUNT] = {
+        {255, 80, 20, 255},
+        {100, 200, 255, 255},
+        {255, 255, 180, 255},
+        {160, 160, 160, 255},
+        {200, 100, 255, 255},
+    };
+    static const Color PU_COLORS[PU_TYPE_COUNT] = {
+        {255, 140, 30, 255},
+        {255, 230, 50, 255},
+        { 50, 220, 220, 255},
+        { 80, 220, 80, 255},
+        {220, 220, 220, 255},
+    };
+
     int panelW = 220, panelH = 300;
-    int panelX = SCREEN_WIDTH  - panelW - 8;
+    int panelX = SCREEN_WIDTH - panelW - 8;
     int panelY = 8;
 
     DrawRectangle(panelX, panelY, panelW, panelH, Fade(BLACK, 0.65f));
@@ -105,7 +122,7 @@ void Debug_Draw(Game *g) {
         Color c = (i < g->lastMilestone)
                       ? (Color){100, 200, 100, 255}
                       : (i == g->lastMilestone)
-                            ? (Color){255, 220,  50, 255}
+                            ? (Color){255, 220, 50, 255}
                             : GRAY;
         DrawText(mLabels[i], panelX + 8, panelY + 42 + i * 14, 12, c);
     }
@@ -120,19 +137,11 @@ void Debug_Draw(Game *g) {
         "[4] Blackout",
         "[5] Inversion",
     };
-    static const Color eColors[EVT_COUNT] = {
-        {255,  80,  20, 255},
-        {100, 200, 255, 255},
-        {255, 255, 180, 255},
-        {160, 160, 160, 255},
-        {200, 100, 255, 255},
-    };
-
 
     int ey = divY + 5;
     for (int i = 0; i < EVT_COUNT; i++) {
-        bool  active = g->events.slots[i].active;
-        Color c      = active ? eColors[i] : GRAY;
+        bool active = g->events.slots[i].active;
+        Color c = active ? EVT_COLORS[i] : GRAY;
         DrawText(eLabels[i], panelX + 8, ey + i * 14, 12, c);
         if (active) {
             float frac = g->events.slots[i].timer / 60.0f;
@@ -141,49 +150,23 @@ void Debug_Draw(Game *g) {
             int barX = panelX + panelW - barW - 6;
             int barY = ey + i * 14 + 1;
             DrawRectangle(barX, barY, barW, 9, Fade(BLACK, 0.5f));
-            DrawRectangle(barX, barY, (int)(barW * frac), 9, Fade(eColors[i], 0.8f));
+            DrawRectangle(barX, barY, (int)(barW * frac), 9, Fade(EVT_COLORS[i], 0.8f));
         }
     }
 
-    static const Color dbgPUColors[PU_TYPE_COUNT] = {
-    {255, 140,  30, 255},  // Jetpack
-    {255, 230,  50, 255},  // Revivos
-    { 50, 220, 220, 255},  // Boty
-    { 80, 220,  80, 255},  // Elixir
-    {220, 220, 220, 255},  // Feather
-};
-    DrawText("[J] Jetpack, [H] Halo, [B] Boots, [E] Elixir, [F] Feather", panelX - 50, panelY + 303, 4, (Color){160, 160, 255, 255});
-    static const char *puLabels[5] = {
-    "[J] Jetpack",
-    "[H] Halo",
-    "[B] Boots",
-    "[E] Elixir",
-    "[F] Feather"
-};
-    int py = panelY + 230; //okej toto tu je zbytecne ale tak necham to tu
-    if (g->fx.jetpackTimer > 0) {
-    DrawText(puLabels[0], panelX + 8, py, 12, dbgPUColors[PU_JETPACK]);
-    py += 14;
-}
-if (g->fx.haloReady) {
-    DrawText(puLabels[1], panelX + 8, py, 12, dbgPUColors[PU_HALO]);
-    py += 14;
-}
-if (g->fx.bootsTimer > 0) {
-    DrawText(puLabels[2], panelX + 8, py, 12, dbgPUColors[PU_BOOTS]);
-    py += 14;
-}
-if (g->fx.elixirTimer > 0) {
-    DrawText(puLabels[3], panelX + 8, py, 12, dbgPUColors[PU_ELIXIR]);
-    py += 14;
-}
-if (g->fx.featherTimer > 0) {
-    DrawText(puLabels[4], panelX + 8, py, 12, dbgPUColors[PU_FEATHER]);
-    py += 14;
-}
-
+    static const char *puLabels[PU_TYPE_COUNT] = {
+        "[J] Jetpack",
+        "[H] Halo",
+        "[B] Boots",
+        "[E] Elixir",
+        "[F] Feather",
+    };
+    int py = panelY + 230;
+    if (g->fx.jetpackTimer > 0) { DrawText(puLabels[PU_JETPACK], panelX + 8, py, 12, PU_COLORS[PU_JETPACK]); py += 14; }
+    if (g->fx.haloReady) { DrawText(puLabels[PU_HALO], panelX + 8, py, 12, PU_COLORS[PU_HALO]); py += 14; }
+    if (g->fx.bootsTimer > 0) { DrawText(puLabels[PU_BOOTS], panelX + 8, py, 12, PU_COLORS[PU_BOOTS]); py += 14; }
+    if (g->fx.elixirTimer > 0) { DrawText(puLabels[PU_ELIXIR], panelX + 8, py, 12, PU_COLORS[PU_ELIXIR]); py += 14; }
+    if (g->fx.featherTimer > 0) { DrawText(puLabels[PU_FEATHER], panelX + 8, py, 12, PU_COLORS[PU_FEATHER]); py += 14; }
 }
 
 #endif
-
-

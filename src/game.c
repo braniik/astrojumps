@@ -1,4 +1,5 @@
 #include "game.h"
+#include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -7,11 +8,11 @@
 #include "debug.h"
 #endif
 
-Music bgm;
-Sound sfxMilestone;
+static Music bgm;
+static Sound sfxMilestone;
 
-static char  s_flashMsg[64] = {0};
-static float s_flashTimer   = 0.0f;
+static char s_flashMsg[64] = {0};
+static float s_flashTimer = 0.0f;
 #define SHUFFLE_MSG_DURATION 2.8f
 
 static void triggerFlash(const char *msg) {
@@ -21,19 +22,18 @@ static void triggerFlash(const char *msg) {
 
 void Game_Init(Game *g) {
     bgm = LoadMusicStream("assets/sfx/soundtrack.mp3");
-    PlayMusicStream(bgm);
     SetMusicVolume(bgm, 0.5f);
     g->bgmEnabled = true;
-    
+
     srand((unsigned int)time(NULL));
 
-    g->state               = STATE_MENU;
-    g->cameraOffsetY       = 0.0f;
-    g->score               = 0;
-    g->lastMilestone       = 0;
-    g->highScore           = 0;
+    g->state = STATE_MENU;
+    g->cameraOffsetY = 0.0f;
+    g->score = 0;
+    g->lastMilestone = 0;
+    g->highScore = 0;
     g->randomEventsEnabled = true;
-    g->keyShuffleEnabled   = true;
+    g->keyShuffleEnabled = true;
 
     Controls_Init(&g->controls);
     Player_Init(&g->player, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT - 120.0f);
@@ -46,14 +46,19 @@ void Game_Init(Game *g) {
 }
 
 static void startGame(Game *g) {
-    g->state         = STATE_PLAYING;
+    g->state = STATE_PLAYING;
     g->cameraOffsetY = 0.0f;
-    g->score         = 0;
+    g->score = 0;
     g->lastMilestone = 0;
-    s_flashTimer     = 0.0f;
+    s_flashTimer = 0.0f;
+
+    if (g->bgmEnabled) {
+        StopMusicStream(bgm);
+        PlayMusicStream(bgm);
+    }
 
     Controls_Init(&g->controls);
-    Player_Init(&g->player, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT - 120.0f);
+    Player_Reset(&g->player, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT - 120.0f);
     PlatformList_Init(&g->platforms);
     PowerupSystem_Reset(&g->powerups, (float)(SCREEN_HEIGHT - 120));
     EventSystem_Reset(&g->events);
@@ -61,7 +66,6 @@ static void startGame(Game *g) {
 }
 
 void Game_Update(Game *g) {
-
     UpdateMusicStream(bgm);
 
     switch (g->state) {
@@ -69,16 +73,14 @@ void Game_Update(Game *g) {
     case STATE_MENU:
         if (IsKeyPressed(KEY_E)) g->randomEventsEnabled = !g->randomEventsEnabled;
         if (IsKeyPressed(KEY_K)) g->keyShuffleEnabled   = !g->keyShuffleEnabled;
-        if (IsKeyPressed(KEY_M)) {
+        if (IsKeyPressed(KEY_M))
             g->bgmEnabled = !g->bgmEnabled;
-            SetMusicVolume(bgm, g->bgmEnabled ? 0.5f : 0.0f);
-        }
         if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE))
             startGame(g);
         break;
 
     case STATE_PLAYING: {
-        float windForce   = 0.0f;
+        float windForce = 0.0f;
         float lavaScreenY = (float)SCREEN_HEIGHT * 10.0f;
 
         if (g->randomEventsEnabled)
@@ -94,16 +96,16 @@ void Game_Update(Game *g) {
 
         float playerScreenY = g->player.pos.y + g->cameraOffsetY;
         if (playerScreenY < SCREEN_HEIGHT / 2) {
-            float diff        = SCREEN_HEIGHT / 2.0f - playerScreenY;
+            float diff = SCREEN_HEIGHT / 2.0f - playerScreenY;
             g->cameraOffsetY += diff;
-            g->score          = (int)(g->cameraOffsetY / 10);
+            g->score = (int)(g->cameraOffsetY / 10);
         }
 
         float extra = (g->fx.elixirTimer > 0.0f) ? (PLAYER_WIDTH * 0.45f / 2.0f) : 0.0f;
         Rectangle pr = {
             g->player.pos.x - PLAYER_WIDTH / 2.0f - extra,
             g->player.pos.y - PLAYER_HEIGHT / 2.0f + g->cameraOffsetY,
-            PLAYER_WIDTH  + extra * 2.0f,
+            PLAYER_WIDTH + extra * 2.0f,
             PLAYER_HEIGHT
         };
         if (PlatformList_CheckCollision(&g->platforms, pr,
@@ -117,7 +119,7 @@ void Game_Update(Game *g) {
 
         int milestoneReached = g->score / MILESTONE_INTERVAL;
         if (milestoneReached > g->lastMilestone) {
-            g->lastMilestone       = milestoneReached;
+            g->lastMilestone = milestoneReached;
             g->platforms.milestone = g->lastMilestone;
 
             if (g->keyShuffleEnabled) {
@@ -140,13 +142,16 @@ void Game_Update(Game *g) {
 
         if (fellOff || hitLava) {
             if (g->fx.haloReady) {
-                g->fx.haloReady       = false;
+                g->fx.haloReady = false;
                 g->fx.haloReviveTimer = 1.5f;
-                g->player.pos.y       = -g->cameraOffsetY + SCREEN_HEIGHT / 2.0f;
-                g->player.vel.y       = BOUNCE_FORCE * 1.4f;
-                g->fx.bootsUsed       = false;
+                g->player.pos.y = -g->cameraOffsetY + SCREEN_HEIGHT / 2.0f;
+                g->player.vel.y = BOUNCE_FORCE * 1.4f;
+                g->fx.bootsUsed = false;
             } else {
                 if (g->score > g->highScore) g->highScore = g->score;
+                StopMusicStream(bgm);
+                Player_StopSounds();
+                EventSystem_StopSounds(&g->events);
                 g->state = STATE_GAME_OVER;
             }
         }
@@ -162,28 +167,23 @@ void Game_Update(Game *g) {
     }
 }
 
-static void drawToggleRow(int cx, int y, const char *label, const char *key,
-                          bool enabled) {
-    Color keyCol    = (Color){180, 180, 180, 255};
-    Color labelCol  = WHITE;
-    Color stateCol  = enabled ? (Color){0, 220, 140, 255} : (Color){160, 60, 60, 255};
+static void drawToggleRow(int cx, int y, const char *label, const char *key, bool enabled) {
+    Color keyCol = (Color){180, 180, 180, 255};
+    Color stateCol = enabled ? (Color){0, 220, 140, 255} : (Color){160, 60, 60, 255};
     const char *stateStr = enabled ? "ON" : "OFF";
 
     char keyBuf[8];
     snprintf(keyBuf, sizeof(keyBuf), "[%s]", key);
 
-    int rowW    = 280;
-    int rowX    = cx - rowW / 2;
-    int keyW    = MeasureText(keyBuf,  16);
-    int labelW  = MeasureText(label,   16);
-    int stateW  = MeasureText(stateStr, 16);
+    int rowW = 280;
+    int rowX = cx - rowW / 2;
+    int keyW = MeasureText(keyBuf, 16);
+    int stateW = MeasureText(stateStr, 16);
 
-    DrawText(keyBuf,   rowX, y, 16, keyCol);
-    DrawText(label,    rowX + keyW + 10, y, 16, labelCol);
+    DrawText(keyBuf, rowX, y, 16, keyCol);
+    DrawText(label, rowX + keyW + 10, y, 16, WHITE);
     DrawText(stateStr, rowX + rowW - stateW, y, 16, stateCol);
-    (void)labelW;
 }
-
 
 void Game_Draw(Game *g) {
     bool inverted = g->randomEventsEnabled && EventSystem_IsInverted(&g->events);
@@ -193,30 +193,27 @@ void Game_Draw(Game *g) {
     else
         BeginDrawing();
 
-    ClearBackground((Color){18, 18, 30, 255});
+    ClearBackground(BLACK);
 
     switch (g->state) {
 
     case STATE_MENU: {
         int cx = SCREEN_WIDTH / 2;
 
-        const char *title = "WHIRLYBIRD";
+        const char *title = "ASTROJUMPS";
         int tw = MeasureText(title, 52);
-        DrawText(title, cx - tw / 2, 160, 52, (Color){0, 220, 140, 255});
+        DrawText(title, cx - tw / 2, 160, 52, BLUE);
 
         DrawLine(cx - 120, 230, cx + 120, 230, Fade(WHITE, 0.15f));
-
-        DrawText("OPTIONS", cx - MeasureText("OPTIONS", 13) / 2,
-                 242, 13, Fade(WHITE, 0.4f));
+        DrawText("OPTIONS", cx - MeasureText("OPTIONS", 13) / 2, 242, 13, Fade(WHITE, 0.4f));
 
         drawToggleRow(cx, 268, "Random Events", "E", g->randomEventsEnabled);
-        drawToggleRow(cx, 294, "Key Shuffle",   "K", g->keyShuffleEnabled);
-        drawToggleRow(cx, 320, "Music",         "M", g->bgmEnabled);
+        drawToggleRow(cx, 294, "Key Shuffle", "K", g->keyShuffleEnabled);
+        drawToggleRow(cx, 320, "Music", "M", g->bgmEnabled);
 
         if (g->keyShuffleEnabled) {
             const char *hint = "Keys reassign at every milestone";
-            DrawText(hint, cx - MeasureText(hint, 12) / 2,
-                     350, 12, (Color){255, 200, 60, 120});
+            DrawText(hint, cx - MeasureText(hint, 12) / 2, 350, 12, (Color){255, 200, 60, 120});
         }
 
         DrawLine(cx - 120, 348, cx + 120, 348, Fade(WHITE, 0.15f));
@@ -224,13 +221,11 @@ void Game_Draw(Game *g) {
         if (g->highScore > 0) {
             char hbuf[32];
             snprintf(hbuf, sizeof(hbuf), "Best: %d", g->highScore);
-            DrawText(hbuf, cx - MeasureText(hbuf, 16) / 2,
-                     362, 16, (Color){255, 200, 60, 255});
+            DrawText(hbuf, cx - MeasureText(hbuf, 16) / 2, 362, 16, (Color){255, 200, 60, 255});
         }
 
         const char *play = "ENTER  or  SPACE  to play";
-        DrawText(play, cx - MeasureText(play, 18) / 2,
-                 SCREEN_HEIGHT - 100, 18, WHITE);
+        DrawText(play, cx - MeasureText(play, 18) / 2, SCREEN_HEIGHT - 100, 18, WHITE);
         break;
     }
 
@@ -255,11 +250,12 @@ void Game_Draw(Game *g) {
         snprintf(scoreBuf, sizeof(scoreBuf), "HEIGHT  %d", g->score);
         DrawText(scoreBuf, 10, 10, 20, WHITE);
 
-        int nextM = (g->lastMilestone + 1) * MILESTONE_INTERVAL;
-        char nBuf[48];
-        snprintf(nBuf, sizeof(nBuf), "Next shuffle: %d", nextM);
-        if (g->keyShuffleEnabled)
+        if (g->keyShuffleEnabled) {
+            int nextM = (g->lastMilestone + 1) * MILESTONE_INTERVAL;
+            char nBuf[48];
+            snprintf(nBuf, sizeof(nBuf), "Next shuffle: %d", nextM);
             DrawText(nBuf, 10, 34, 14, GRAY);
+        }
 
         if (s_flashTimer > 0) {
             float alpha = s_flashTimer / SHUFFLE_MSG_DURATION;
@@ -291,15 +287,14 @@ void Game_Draw(Game *g) {
     case STATE_GAME_OVER: {
         int cx = SCREEN_WIDTH / 2;
         const char *over = "GAME OVER";
-        int ow = MeasureText(over, 48);
-        DrawText(over, cx - ow / 2, 200, 48, RED);
+        DrawText(over, cx - MeasureText(over, 48) / 2, 200, 48, RED);
 
         char scoreLine[48], hiBuf[48];
         snprintf(scoreLine, sizeof(scoreLine), "Score:  %d", g->score);
-        snprintf(hiBuf,     sizeof(hiBuf),     "Best:   %d", g->highScore);
+        snprintf(hiBuf, sizeof(hiBuf), "Best:   %d", g->highScore);
 
         DrawText(scoreLine, cx - MeasureText(scoreLine, 24) / 2, 270, 24, WHITE);
-        DrawText(hiBuf,     cx - MeasureText(hiBuf,     24) / 2, 300, 24, (Color){255, 200, 60, 255});
+        DrawText(hiBuf, cx - MeasureText(hiBuf, 24) / 2, 300, 24, (Color){255, 200, 60, 255});
 
         const char *r = "ENTER / SPACE  to restart";
         DrawText(r, cx - MeasureText(r, 16) / 2, SCREEN_HEIGHT - 100, 16, GRAY);
@@ -319,8 +314,9 @@ void Game_Draw(Game *g) {
 }
 
 void Game_Cleanup(Game *g) {
-    EventSystem_Cleanup(&g->events);
+    EventSystem_Unload(&g->events);
     Player_Unload(&g->player);
+    PowerupSystem_Unload();
     UnloadSound(sfxMilestone);
     StopMusicStream(bgm);
     UnloadMusicStream(bgm);

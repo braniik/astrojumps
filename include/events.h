@@ -14,25 +14,27 @@ typedef enum {
 } EventType;
 
 typedef struct {
-    bool  active;
+    bool active;
     float timer;
-    float data;    // taka zajimava variable, moze byt cokolvek, prosim nechytaj sa teho ked nerozumis temu kodu, kedtak vysvetlim
+    float data;
 } EventSlot;
 
 typedef struct {
-    EventSlot      slots[EVT_COUNT];
-    float          nextEventTimer;
+    EventSlot slots[EVT_COUNT];
+    float nextEventTimer;
     RenderTexture2D invRT;
-    bool           invRTReady;
+    bool invRTReady;
 } EventSystem;
 
-void  EventSystem_Init(EventSystem *es);
-void  EventSystem_Reset(EventSystem *es);
-void  EventSystem_Cleanup(EventSystem *es);
-void  EventSystem_Update(EventSystem *es, float cameraOffsetY, float *outWindForce, float *outLavaScreenY);
-bool  EventSystem_IsInverted(EventSystem *es);
-void  EventSystem_BeginCapture(EventSystem *es);
-void  EventSystem_EndCapture(EventSystem *es);
-void  EventSystem_DrawOverlay(EventSystem *es);
+void EventSystem_Init(EventSystem *es);
+void EventSystem_Reset(EventSystem *es);
+void EventSystem_Cleanup(EventSystem *es);
+void EventSystem_Unload(EventSystem *es);
+void EventSystem_StopSounds(EventSystem *es);
+void EventSystem_Update(EventSystem *es, float cameraOffsetY, float *outWindForce, float *outLavaScreenY);
+bool EventSystem_IsInverted(EventSystem *es);
+void EventSystem_BeginCapture(EventSystem *es);
+void EventSystem_EndCapture(EventSystem *es);
+void EventSystem_DrawOverlay(EventSystem *es);
 
 #endif

@@ -1,23 +1,28 @@
-// Asi najjednoduchsi file, proste nas startovnik, nejeb tu nic insi
-
 #include "game.h"
 #include "raylib.h"
 
 int main(void) {
-  InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, GAME_TITLE);
-  InitAudioDevice();
-  SetExitKey(KEY_NULL);
-  SetTargetFPS(TARGET_FPS);
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, GAME_TITLE);
+    InitAudioDevice();
+    SetExitKey(KEY_NULL);
+    SetTargetFPS(TARGET_FPS);
 
-  Game g;
-  Game_Init(&g);
+    Image icon = LoadImage("assets/icon.png");
+    if (icon.data) {
+        SetWindowIcon(icon);
+        UnloadImage(icon);
+    }
 
-  while (!WindowShouldClose()) {
-    Game_Update(&g);
-    Game_Draw(&g);
-  }
+    Game g;
+    Game_Init(&g);
 
-  Game_Cleanup(&g);
-  CloseWindow();
-  return 0;
+    while (!WindowShouldClose()) {
+        Game_Update(&g);
+        Game_Draw(&g);
+    }
+
+    Game_Cleanup(&g);
+    CloseAudioDevice();
+    CloseWindow();
+    return 0;
 }
