@@ -5,6 +5,8 @@ A keyboard-driven space platformer built with C and raylib. Jump higher and high
 ## High Score Screenshots (Can you beat us? 🤔)
 ### Braniik's high score (All modifiers enabled)
 <img width="411" height="640" alt="image" src="https://github.com/user-attachments/assets/69bc5567-3c29-49d6-92a5-3a7578ffb434" />
+### Kube's high score (All modifiers enabled)
+<img width="490" height="759" alt="image2" src="https://github.com/user-attachments/assets/f8dfb1f9-e2d1-4330-9414-eb3898ffb538" />
 
 ## Features
 
