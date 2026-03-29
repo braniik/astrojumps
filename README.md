@@ -1,6 +1,6 @@
 # AstroJumps
 
-A keyboard-driven space platformer built with C and raylib. Jump higher and higher through the cosmos — but watch out, the controls shuffle every milestone.
+A keyboard-driven space platformer built with C and raylib. Jump higher and higher through the cosmos, but watch out, the controls shuffle every milestone.
 
 ## High Score Screenshots (Can you beat us? 🤔)
 ### Braniik's high score (All modifiers enabled)
