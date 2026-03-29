@@ -16,7 +16,7 @@ A keyboard-driven space platformer built with C and raylib. Jump higher and high
 - **Platform variety:** Eight platform types that unlock progressively such as flickers, movers, teleporters, and more!
 - **Powerups:** Jetpack, Revive, Boots, Elixir, Feather.
 - **Random events:** Rising lava, wind gusts, flash blindness, blackout, and screen inversion.
-- **Space aesthetic:** Pure black background, neon-lit platforms, starfield feel.
+- **Space aesthetic:** Pure black background, neon-lit platforms, you play as an astronaut.
 
 ## Installation
 
@@ -28,7 +28,7 @@ Download the installer from the [latest release](https://github.com/braniik/astr
 yay -S astrojumps-git
 ```
 
-#### Other Linux — build from source
+#### Other Linux distros — build from source
 See the [Build from Source](#build-from-source) section below.
 
 ## Dependencies
@@ -47,6 +47,12 @@ sudo pacman -S raylib gcc make
 ```bash
 sudo apt install libraylib-dev gcc make
 ```
+
+#### Fedora
+```bash
+sudo dnf install raylib-devel gcc make
+```
+
 
 #### Windows (MinGW64)
 
