@@ -23,6 +23,14 @@ A keyboard-driven space platformer built with C and raylib. Jump higher and high
 #### Windows
 Download the installer from the [latest release](https://github.com/braniik/astrojumps/releases/latest).
 
+#### macOS (Apple silicon)
+Download [AstroJumps-macOS-arm64.dmg](https://github.com/braniik/astrojumps/releases/latest/download/AstroJumps-macOS-arm64.dmg).
+1. Open the downloaded DMG.
+2. Drag `AstroJumps.app` to the `Applications` shortcut in the window.
+3. Eject the mounted `AstroJumps` disk image.
+4. Open AstroJumps from Applications.
+This build supports Apple silicon Macs only. It is not notarized by Apple, so macOS may show a security warning on first launch. If you trust the download, follow [Apple's instructions for opening an app macOS can't verify](https://support.apple.com/en-us/102445).
+
 #### Arch Linux (AUR)
 ```bash
 yay -S astrojumps-git
